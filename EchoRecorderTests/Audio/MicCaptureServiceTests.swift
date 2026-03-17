@@ -3,7 +3,7 @@ import XCTest
 
 final class MicCaptureServiceTests: XCTestCase {
     func testStartAndStopToggleCaptureState() throws {
-        let service = MicCaptureService()
+        let service = MicCaptureService(engine: FakeMicEngine())
 
         XCTAssertFalse(service.isCapturing)
 
@@ -15,7 +15,7 @@ final class MicCaptureServiceTests: XCTestCase {
     }
 
     func testStartCaptureWhileCapturingThrowsAlreadyCapturing() throws {
-        let service = MicCaptureService()
+        let service = MicCaptureService(engine: FakeMicEngine())
         try service.startCapture()
 
         XCTAssertThrowsError(try service.startCapture()) { error in
@@ -27,7 +27,7 @@ final class MicCaptureServiceTests: XCTestCase {
     }
 
     func testStopCaptureWhileNotCapturingThrowsNotCapturing() {
-        let service = MicCaptureService()
+        let service = MicCaptureService(engine: FakeMicEngine())
 
         XCTAssertThrowsError(try service.stopCapture()) { error in
             guard case MicCaptureServiceError.notCapturing = error else {
@@ -36,4 +36,14 @@ final class MicCaptureServiceTests: XCTestCase {
             }
         }
     }
+}
+
+private final class FakeMicEngine: MicCaptureEngine {
+    func installTap(_ handler: @escaping (MicSampleBuffer) -> Void) {}
+
+    func removeTap() {}
+
+    func start() throws {}
+
+    func stop() {}
 }
