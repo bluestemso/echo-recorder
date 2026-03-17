@@ -9,10 +9,10 @@ struct RecordingFinalizer {
     let fileWriter: any FileWriting
     let defaultDirectory: URL
 
-    func finalize(fileName: String, overrideDirectory: URL?) throws -> URL {
+    func finalize(fileName: String, overrideDirectory: URL?) throws -> FinalizedAudioOutput {
         let sanitizedFileName = try validate(fileName: fileName)
         let directory = overrideDirectory ?? defaultDirectory
-        return fileWriter.outputURL(fileName: sanitizedFileName, directory: directory)
+        return try fileWriter.output(fileName: sanitizedFileName, directory: directory)
     }
 
     private func validate(fileName: String) throws -> String {

@@ -8,9 +8,12 @@ final class RecordingFinalizerTests: XCTestCase {
         let defaultDirectory = URL(fileURLWithPath: "/tmp/echo-recorder-tests/default", isDirectory: true)
         let finalizer = RecordingFinalizer(fileWriter: fileWriter, defaultDirectory: defaultDirectory)
 
-        let outputURL = try finalizer.finalize(fileName: "recording.m4a", overrideDirectory: nil)
+        let output = try finalizer.finalize(fileName: "recording", overrideDirectory: nil)
 
-        XCTAssertEqual(outputURL, defaultDirectory.appendingPathComponent("recording.m4a", isDirectory: false))
+        XCTAssertEqual(output.folder, defaultDirectory.appendingPathComponent("recording", isDirectory: true))
+        XCTAssertEqual(output.mixed.lastPathComponent, "mixed.m4a")
+        XCTAssertEqual(output.system.lastPathComponent, "system_audio.m4a")
+        XCTAssertEqual(output.mic.lastPathComponent, "mic_audio.m4a")
     }
 
     func testFinalizeUsesOverrideDirectoryWhenProvided() throws {
@@ -19,9 +22,9 @@ final class RecordingFinalizerTests: XCTestCase {
         let overrideDirectory = URL(fileURLWithPath: "/tmp/echo-recorder-tests/override", isDirectory: true)
         let finalizer = RecordingFinalizer(fileWriter: fileWriter, defaultDirectory: defaultDirectory)
 
-        let outputURL = try finalizer.finalize(fileName: "recording.m4a", overrideDirectory: overrideDirectory)
+        let output = try finalizer.finalize(fileName: "recording", overrideDirectory: overrideDirectory)
 
-        XCTAssertEqual(outputURL, overrideDirectory.appendingPathComponent("recording.m4a", isDirectory: false))
+        XCTAssertEqual(output.folder, overrideDirectory.appendingPathComponent("recording", isDirectory: true))
     }
 
     func testFinalizeThrowsForEmptyFileName() {

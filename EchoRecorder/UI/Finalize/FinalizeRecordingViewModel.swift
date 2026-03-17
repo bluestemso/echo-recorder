@@ -3,7 +3,11 @@ import Foundation
 
 @MainActor
 final class FinalizeRecordingViewModel: ObservableObject {
-    @Published private(set) var finalizedURL: URL?
+    @Published private(set) var finalizedOutput: FinalizedAudioOutput?
+
+    var finalizedURL: URL? {
+        finalizedOutput?.mixed
+    }
 
     private let finalizer: RecordingFinalizer
 
@@ -12,6 +16,6 @@ final class FinalizeRecordingViewModel: ObservableObject {
     }
 
     func finalizeRecording(fileName: String, overrideDirectory: URL?) throws {
-        finalizedURL = try finalizer.finalize(fileName: fileName, overrideDirectory: overrideDirectory)
+        finalizedOutput = try finalizer.finalize(fileName: fileName, overrideDirectory: overrideDirectory)
     }
 }

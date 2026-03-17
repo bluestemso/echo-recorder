@@ -11,13 +11,16 @@ final class FinalizeRecordingViewModelTests: XCTestCase {
         )
         let viewModel = FinalizeRecordingViewModel(finalizer: finalizer)
 
-        try viewModel.finalizeRecording(fileName: "recording.m4a", overrideDirectory: nil)
+        try viewModel.finalizeRecording(fileName: "recording", overrideDirectory: nil)
 
         XCTAssertEqual(
             viewModel.finalizedURL,
             URL(fileURLWithPath: "/tmp/echo-recorder-tests/default", isDirectory: true)
-                .appendingPathComponent("recording.m4a", isDirectory: false)
+                .appendingPathComponent("recording", isDirectory: true)
+                .appendingPathComponent("mixed.m4a", isDirectory: false)
         )
+        XCTAssertEqual(viewModel.finalizedOutput?.system.lastPathComponent, "system_audio.m4a")
+        XCTAssertEqual(viewModel.finalizedOutput?.mic.lastPathComponent, "mic_audio.m4a")
     }
 
     func testFinalizeRecordingLeavesFinalizedURLUnsetOnError() {
