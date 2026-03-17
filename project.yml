@@ -1,0 +1,36 @@
+name: EchoRecorder
+options:
+  bundleIdPrefix: com.echo.recorder
+targets:
+  EchoRecorder:
+    type: application
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      - EchoRecorder
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.echo.recorder.app
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_LSUIElement: YES
+        CODE_SIGNING_ALLOWED: NO
+  EchoRecorderTests:
+    type: bundle.unit-test
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      - EchoRecorderTests
+    dependencies:
+      - target: EchoRecorder
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+schemes:
+  EchoRecorder:
+    build:
+      targets:
+        EchoRecorder: all
+        EchoRecorderTests: [test]
+    test:
+      targets:
+        - EchoRecorderTests
