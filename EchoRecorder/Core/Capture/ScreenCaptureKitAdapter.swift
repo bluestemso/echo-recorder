@@ -1,11 +1,15 @@
 @MainActor
-protocol ScreenCaptureKitAdapting {
+protocol ScreenCaptureKitAdapting: AnyObject {
+    var onSystemAudioSamples: ((SystemAudioSampleBuffer) -> Void)? { get set }
+
     func startCapture(source: CaptureSourceDescriptor) async throws
     func stopCapture() async throws
 }
 
 @MainActor
-struct ScreenCaptureKitAdapter: ScreenCaptureKitAdapting {
+final class ScreenCaptureKitAdapter: ScreenCaptureKitAdapting {
+    var onSystemAudioSamples: ((SystemAudioSampleBuffer) -> Void)?
+
     func startCapture(source: CaptureSourceDescriptor) async throws {}
 
     func stopCapture() async throws {}

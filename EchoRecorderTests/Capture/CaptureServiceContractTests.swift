@@ -155,6 +155,8 @@ private final class FakeScreenCaptureKitAdapter: ScreenCaptureKitAdapting {
     private var startContinuation: CheckedContinuation<Void, Never>?
     private var stopContinuation: CheckedContinuation<Void, Never>?
 
+    var onSystemAudioSamples: ((SystemAudioSampleBuffer) -> Void)?
+
     private(set) var startCallCount = 0
     private(set) var stopCallCount = 0
 

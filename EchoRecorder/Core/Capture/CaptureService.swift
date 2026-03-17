@@ -24,6 +24,19 @@ final class CaptureService: CaptureServicing {
 
     private var lifecycleState: LifecycleState = .idle
 
+    var onSystemAudioSamples: ((SystemAudioSampleBuffer) -> Void)? {
+        didSet {
+            guard onSystemAudioSamples != nil else {
+                adapter.onSystemAudioSamples = nil
+                return
+            }
+
+            adapter.onSystemAudioSamples = { [weak self] sampleBuffer in
+                self?.onSystemAudioSamples?(sampleBuffer)
+            }
+        }
+    }
+
     var isRunning: Bool {
         lifecycleState == .running || lifecycleState == .stopping
     }
