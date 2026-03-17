@@ -14,6 +14,8 @@
 - [ ] Complete every item in `docs/testing/manual-qa-checklist.md`.
 - [ ] Verify one clean idle -> recording -> finalize -> idle pass manually.
 - [ ] Confirm no unexpected permission prompts appear after initial grant.
+- [ ] Confirm finalized output includes `mixed.m4a`, `system_audio.m4a`, and `mic_audio.m4a`.
+- [ ] Confirm MVP scope remains audio-only (no required video artifact).
 
 ## Release artifacts
 

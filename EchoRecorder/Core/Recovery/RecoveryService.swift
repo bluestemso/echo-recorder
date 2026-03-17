@@ -1,6 +1,12 @@
 import Foundation
 
 struct RecoveryService {
+    private static let requiredAudioArtifacts: Set<String> = [
+        "mixed.m4a",
+        "system_audio.m4a",
+        "mic_audio.m4a"
+    ]
+
     private let manifestsDirectory: URL
     private let fileManager: FileManager
     private let decoder: JSONDecoder
@@ -45,5 +51,12 @@ struct RecoveryService {
         }
 
         return manifestsNeedingRecovery
+    }
+
+    func findUnfinalizedAudioManifests() -> [RecordingManifest] {
+        findUnfinalizedManifests().filter { manifest in
+            let fileNames = Set(manifest.recordingFileNames)
+            return fileNames.isSuperset(of: RecoveryService.requiredAudioArtifacts)
+        }
     }
 }

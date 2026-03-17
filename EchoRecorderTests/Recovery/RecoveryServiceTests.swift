@@ -109,6 +109,37 @@ final class RecoveryServiceTests: XCTestCase {
         XCTAssertEqual(diagnostics.count, 1)
     }
 
+    func testFindUnfinalizedAudioManifestsRequiresMixedAndIsolatedArtifacts() throws {
+        let manifestsDirectory = try makeTemporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: manifestsDirectory) }
+
+        try writeManifest(
+            RecordingManifest(
+                profileID: "default",
+                recordingFileNames: ["mixed.m4a", "system_audio.m4a", "mic_audio.m4a"],
+                isFinalized: false
+            ),
+            to: manifestsDirectory,
+            named: "complete"
+        )
+
+        try writeManifest(
+            RecordingManifest(
+                profileID: "default",
+                recordingFileNames: ["mixed.m4a", "system_audio.m4a"],
+                isFinalized: false
+            ),
+            to: manifestsDirectory,
+            named: "missing-mic"
+        )
+
+        let service = RecoveryService(manifestsDirectory: manifestsDirectory)
+        let manifests = service.findUnfinalizedAudioManifests()
+
+        XCTAssertEqual(manifests.count, 1)
+        XCTAssertEqual(manifests.first?.recordingFileNames, ["mixed.m4a", "system_audio.m4a", "mic_audio.m4a"])
+    }
+
     private func makeTemporaryDirectory() throws -> URL {
         let fileManager = FileManager.default
         let directory = fileManager.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
