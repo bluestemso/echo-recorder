@@ -34,15 +34,19 @@ final class RecordingViewModel: ObservableObject {
 
     private let onStartRecording: () -> Void
     private let onStopRecording: () -> Void
+    private let audioMixer: any AudioMixing
     private weak var recorderCoordinator: RecorderCoordinator?
     private var cancellables: Set<AnyCancellable> = []
+    private var sourceGain = SourceGain.unity
 
     init(
         recorderCoordinator: RecorderCoordinator? = nil,
+        audioMixer: any AudioMixing = AudioMixerService(),
         onStartRecording: @escaping () -> Void = {},
         onStopRecording: @escaping () -> Void = {}
     ) {
         self.recorderCoordinator = recorderCoordinator
+        self.audioMixer = audioMixer
         self.onStartRecording = onStartRecording
         self.onStopRecording = onStopRecording
 
@@ -65,6 +69,23 @@ final class RecordingViewModel: ObservableObject {
 
     func bindRecorderState(_ state: RecorderState) {
         isRecording = state == .preparing || state == .recording
+    }
+
+    func setGain(_ value: Float, for source: InputSource) {
+        switch source {
+        case .system:
+            sourceGain.system = value
+        case .microphone:
+            sourceGain.microphone = value
+        }
+    }
+
+    func applyMeterSnapshot(system: SourceLevel, mic: SourceLevel) {
+        let gainedLevels = audioMixer.applyGain(system: system, mic: mic, gain: sourceGain)
+        updateLevels([
+            .system: gainedLevels.system,
+            .microphone: gainedLevels.mic
+        ])
     }
 
     func toggleRecording() {

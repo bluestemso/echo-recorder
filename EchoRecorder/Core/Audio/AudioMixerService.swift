@@ -1,8 +1,22 @@
 protocol AudioMixing {
     func mix(_ sources: [[Float]]) -> [Float]
+    func applyGain(system: SourceLevel, mic: SourceLevel, gain: SourceGain) -> (system: SourceLevel, mic: SourceLevel)
+}
+
+struct SourceGain {
+    var system: Float
+    var microphone: Float
+
+    static let unity = SourceGain(system: 1, microphone: 1)
 }
 
 struct AudioMixerService: AudioMixing {
+    private let meteringService: any MeteringServicing
+
+    init(meteringService: any MeteringServicing = MeteringService()) {
+        self.meteringService = meteringService
+    }
+
     func mix(_ sources: [[Float]]) -> [Float] {
         let maxSampleCount = sources.map(\.count).max() ?? 0
         guard maxSampleCount > 0 else {
@@ -32,5 +46,12 @@ struct AudioMixerService: AudioMixing {
         }
 
         return mixed
+    }
+
+    func applyGain(system: SourceLevel, mic: SourceLevel, gain: SourceGain) -> (system: SourceLevel, mic: SourceLevel) {
+        (
+            system: meteringService.applyGain(gain.system, to: system),
+            mic: meteringService.applyGain(gain.microphone, to: mic)
+        )
     }
 }

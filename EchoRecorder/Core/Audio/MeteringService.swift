@@ -1,5 +1,6 @@
 protocol MeteringServicing {
     func computeLevel(samples: [Float]) -> SourceLevel
+    func applyGain(_ gain: Float, to level: SourceLevel) -> SourceLevel
 }
 
 struct MeteringService: MeteringServicing {
@@ -22,5 +23,13 @@ struct MeteringService: MeteringServicing {
         let rms = Float(meanSquare.squareRoot())
 
         return SourceLevel(peak: peak, rms: rms)
+    }
+
+    func applyGain(_ gain: Float, to level: SourceLevel) -> SourceLevel {
+        let clampedGain = max(gain, 0)
+        return SourceLevel(
+            peak: level.peak * clampedGain,
+            rms: level.rms * clampedGain
+        )
     }
 }

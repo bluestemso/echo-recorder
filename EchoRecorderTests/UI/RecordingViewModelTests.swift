@@ -64,4 +64,17 @@ final class RecordingViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.levelRows[1].source, .microphone)
         XCTAssertEqual(viewModel.levelRows[1].level, .zero)
     }
+
+    func testApplyMeterSnapshotMaintainsStableOrder() {
+        let viewModel = RecordingViewModel()
+
+        viewModel.setGain(1.0, for: .system)
+        viewModel.setGain(1.0, for: .microphone)
+        viewModel.applyMeterSnapshot(
+            system: SourceLevel(peak: 0.9, rms: 0.7),
+            mic: SourceLevel(peak: 0.3, rms: 0.2)
+        )
+
+        XCTAssertEqual(viewModel.levelRows.map(\.source), [.system, .microphone])
+    }
 }
