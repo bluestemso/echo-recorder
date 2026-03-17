@@ -19,4 +19,12 @@ final class PermissionWizardViewModel {
     var canContinue: Bool {
         blockingPermission == nil
     }
+
+    func requestBlockingPermission() async -> PermissionStatus? {
+        guard let permission = blockingPermission else {
+            return nil
+        }
+
+        return await permissionManager.request(permission)
+    }
 }
