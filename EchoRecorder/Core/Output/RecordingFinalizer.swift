@@ -1,5 +1,9 @@
 import Foundation
 
+protocol RecordingFinalizing {
+    func finalize(fileName: String, overrideDirectory: URL?) throws -> FinalizedAudioOutput
+}
+
 enum RecordingFinalizerError: Error, Equatable {
     case emptyFileName
     case invalidFileName(String)
@@ -32,3 +36,5 @@ struct RecordingFinalizer {
         return trimmedName
     }
 }
+
+extension RecordingFinalizer: RecordingFinalizing {}

@@ -68,7 +68,7 @@ final class RecordingViewModel: ObservableObject {
     }
 
     func bindRecorderState(_ state: RecorderState) {
-        isRecording = state == .preparing || state == .recording
+        isRecording = state == .preparing || state == .recording || state == .finalizing
     }
 
     func setGain(_ value: Float, for source: InputSource) {
