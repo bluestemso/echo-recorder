@@ -1,14 +1,15 @@
 ---
 gsd_state_version: 1.0
 milestone: v2.0
-milestone_name: UX Polish & Input Selection
-status: defining_requirements
-last_updated: "2026-03-18T19:30:00.000Z"
+milestone_name: milestone
+status: In progress
+last_updated: "2026-03-18T21:36:51.962Z"
+last_activity: 2026-03-18 — Completed 04-02 plan
 progress:
-  total_phases: 0
+  total_phases: 3
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 2
+  completed_plans: 2
 ---
 
 # STATE.md
@@ -24,10 +25,9 @@ See: `.planning/PROJECT.md` (updated 2026-03-18)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-03-18 — Milestone v2.0 started
+Phase: 04 (Input Source Selection) — COMPLETE
+Plan: 2 of 2
+Status: Phase complete
 
 ---
 
@@ -48,9 +48,27 @@ Last activity: 2026-03-18 — Milestone v2.0 started
 
 | Phase | Name | Status |
 |-------|------|--------|
-| 4 | TBD (Input Source Selection) | ⏳ Not started |
+| 4 | Input Source Selection | ✅ Complete |
 | 5 | TBD (Menu Bar Iconography) | ⏳ Not started |
 | 6 | TBD (UX Polish) | ⏳ Not started |
 
 ---
+
+## Decisions Made
+
+- Used String ID-based Picker binding to avoid needing Hashable conformance on AudioInputDevice
+- Settings section uses expand/collapse pattern with chevron indicator and animation
+- Error state uses case-insensitive matching for device-related keywords
+
+---
+
+## Key Accomplishments
+
+- 04-01: Created InputDeviceService with Core Audio enumeration and JSONStore persistence
+- 04-02: Added InputDevicePicker UI component with device type badges
+- Added inline settings section to RecordingPopoverView
+
+---
+
 *Milestone v2.0 started: 2026-03-18*
+*Phase 04 completed: 2026-03-18*
