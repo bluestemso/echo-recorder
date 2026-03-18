@@ -81,6 +81,7 @@ struct RecordingPopoverView: View {
                 }
             }
             .buttonStyle(.plain)
+            .frame(maxWidth: .infinity, alignment: .leading)
             .contentShape(Rectangle())
             .focusable(false)
 
