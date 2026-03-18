@@ -12,6 +12,12 @@
 
 **Requirements:** INPUT-01, INPUT-02, INPUT-03, INPUT-04, INPUT-05, INPUT-06
 
+**Plans:** 2 plans
+
+Plans:
+- [ ] 04-01-PLAN.md — Backend: device enumeration, MicCaptureEngine protocol extension, InputDeviceService persistence, RecorderCoordinator wiring
+- [ ] 04-02-PLAN.md — UI: InputDevicePicker component, inline settings section in RecordingPopoverView
+
 **Success criteria:**
 1. User can see available audio input devices in the app
 2. User can select which input device to use for recording
