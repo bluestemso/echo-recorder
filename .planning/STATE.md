@@ -2,12 +2,11 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
-status: In progress
-last_updated: "2026-03-18T21:36:51.962Z"
-last_activity: 2026-03-18 — Completed 04-02 plan
+status: completed
+last_updated: "2026-03-18T21:40:35.680Z"
 progress:
   total_phases: 3
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 2
   completed_plans: 2
 ---
@@ -59,12 +58,15 @@ Status: Phase complete
 - Used String ID-based Picker binding to avoid needing Hashable conformance on AudioInputDevice
 - Settings section uses expand/collapse pattern with chevron indicator and animation
 - Error state uses case-insensitive matching for device-related keywords
+- Used Core Audio HAL APIs for macOS device enumeration instead of iOS-only AVAudioSession
+- Device selection via kAudioHardwarePropertyDefaultInputDevice (system-wide, restored after stop) rather than unavailable AVAudioEngine-specific API
+- UID resolution via kAudioHardwarePropertyDeviceForUID before setting default device
 
 ---
 
 ## Key Accomplishments
 
-- 04-01: Created InputDeviceService with Core Audio enumeration and JSONStore persistence
+- 04-01: Created InputDeviceService with Core Audio enumeration, built-in mic detection, JSONStore persistence; wired RecorderCoordinator and RecordingViewModel
 - 04-02: Added InputDevicePicker UI component with device type badges
 - Added inline settings section to RecordingPopoverView
 

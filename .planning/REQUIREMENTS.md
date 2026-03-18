@@ -34,12 +34,12 @@
 
 ### Input Source (INPUT)
 
-- [ ] **INPUT-01**: App displays available audio input devices in settings or recording UI
-- [ ] **INPUT-02**: User can select which audio input device to use for recording
-- [ ] **INPUT-03**: App defaults to built-in microphone when no device is manually selected
-- [ ] **INPUT-04**: App detects built-in microphone by checking device name for "Built-in", "MacBook", or "Internal Microphone"
-- [ ] **INPUT-05**: Input device selection persists across app launches
-- [ ] **INPUT-06**: App records microphone audio when Bluetooth headphones are connected (fix current bug)
+- [x] **INPUT-01**: App displays available audio input devices in settings or recording UI
+- [x] **INPUT-02**: User can select which audio input device to use for recording
+- [x] **INPUT-03**: App defaults to built-in microphone when no device is manually selected
+- [x] **INPUT-04**: App detects built-in microphone by checking device name for "Built-in", "MacBook", or "Internal Microphone"
+- [x] **INPUT-05**: Input device selection persists across app launches
+- [x] **INPUT-06**: App records microphone audio when Bluetooth headphones are connected (fix current bug)
 
 ## v2 Requirements (Deferred)
 
@@ -75,12 +75,12 @@
 | ANIM-01 | Phase 6 | Pending |
 | ANIM-02 | Phase 6 | Pending |
 | ANIM-03 | Phase 6 | Pending |
-| INPUT-01 | Phase 4 | Pending |
-| INPUT-02 | Phase 4 | Pending |
-| INPUT-03 | Phase 4 | Pending |
-| INPUT-04 | Phase 4 | Pending |
-| INPUT-05 | Phase 4 | Pending |
-| INPUT-06 | Phase 4 | Pending |
+| INPUT-01 | Phase 4 | Complete |
+| INPUT-02 | Phase 4 | Complete |
+| INPUT-03 | Phase 4 | Complete |
+| INPUT-04 | Phase 4 | Complete |
+| INPUT-05 | Phase 4 | Complete |
+| INPUT-06 | Phase 4 | Complete |
 
 **Coverage:**
 - v1 requirements: 19 total
