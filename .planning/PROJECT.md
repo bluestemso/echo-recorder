@@ -2,7 +2,7 @@
 
 ## What This Is
 
-EchoRecorder is a macOS menu bar app for local recording of meetings and calls. It captures system audio and microphone input simultaneously, producing mixed and isolated audio tracks, and is designed for individual knowledge workers who want lightweight, reliable local recording without cloud dependency.
+EchoRecorder is a macOS menu bar app for local recording of meetings and calls. It captures system audio and microphone input simultaneously, produces mixed and isolated audio tracks, and is designed for individual knowledge workers who want lightweight, reliable local recording without cloud dependency.
 
 ## Core Value
 
@@ -12,27 +12,28 @@ User can start a recording in two clicks, monitor and adjust levels live, and re
 
 ### Validated
 
-<!-- Shipped and confirmed valuable in Phase 2 audio-first MVP. -->
+<!-- v1.0 MVP shipped -->
 
-- ✓ Menu bar app shell (`LSUIElement`) with popover-based recording UI — Phase 2
-- ✓ Recording state machine (`idle → preparing → recording → finalizing → idle`) — Phase 2
-- ✓ Microphone permission request flow — Phase 2
-- ✓ Screen recording permission request flow — Phase 2
-- ✓ System audio capture via ScreenCaptureKit — Phase 2
-- ✓ Microphone capture via AVAudioEngine tap — Phase 2
-- ✓ Per-source gain model and UI bindings (system audio, microphone) — Phase 2
-- ✓ Audio writer pipeline: `mixed.m4a`, `system_audio.m4a`, `mic_audio.m4a` — Phase 2
-- ✓ Output filename validation and finalizer flow — Phase 2
-- ✓ JSON persistence and crash-recovery manifest scanning — Phase 2
-- ✓ Unit, integration, and smoke harness test coverage — Phase 2
+- ✓ Menu bar app shell (`LSUIElement`) with popover-based recording UI — v1.0
+- ✓ Recording state machine (`idle → preparing → recording → finalizing → idle`) — v1.0
+- ✓ Microphone permission request flow — v1.0
+- ✓ Screen recording permission request flow — v1.0
+- ✓ System audio capture via ScreenCaptureKit — v1.0
+- ✓ Microphone capture via AVAudioEngine tap — v1.0
+- ✓ Per-source gain model and UI bindings (system audio, microphone) — v1.0
+- ✓ Audio writer pipeline: `mixed.m4a`, `system_audio.m4a`, `mic_audio.m4a` — v1.0
+- ✓ Output filename validation and finalizer flow — v1.0
+- ✓ JSON persistence and crash-recovery manifest scanning — v1.0
+- ✓ Unit, integration, and smoke harness test coverage — v1.0
+- ✓ Live input level monitoring UI (real-time RMS/peak meters displayed in recording popover per source) — v1.0
+- ✓ Per-source gain adjustment controls in recording popover (sliders visible during recording) — v1.0
+- ✓ Save location picker during finalize step (directory override before saving output) — v1.0
 
 ### Active
 
-<!-- Current scope: polish and complete MVP UX. -->
+<!-- Next milestone scope to be defined with /gsd-new-milestone -->
 
-- [ ] Live input level monitoring UI (real-time RMS/peak meters displayed in recording popover per source)
-- [ ] Per-source gain adjustment controls in recording popover (sliders visible during recording)
-- [ ] Save location picker during finalize step (directory override before saving output)
+(TBD — start next milestone with `/gsd-new-milestone`)
 
 ### Out of Scope
 
@@ -41,12 +42,17 @@ User can start a recording in two clicks, monitor and adjust levels live, and re
 - Noise removal or post-processing beyond level controls — out of scope for MVP
 - Multi-machine or team collaboration — out of scope; single-user local tool
 
-## Context
+## Current State
 
-- **Existing state:** Phase 2 audio-first MVP is complete and tested. The core services (capture, mixing, metering, finalization, recovery) are implemented and covered by unit, integration, and smoke tests.
-- **Architecture:** Protocol-first, dependency-injected service layer. Coordinator pattern (`RecorderCoordinator`). AppKit `NSStatusItem` + SwiftUI popover UI. Combine `@Published` state binding.
-- **Known gap:** The live metering and gain controls exist in the core (`MeteringService`, `AudioMixerService`, `RecordingViewModel`) but are not fully surfaced or interactive in the UI yet. The save location field in the finalize dialog is also pending.
-- **Testing approach:** TDD-first with XCTest. New features should follow the same red/green/commit cycle established in Phase 2.
+**Shipped:** v1.0 MVP — 3 phases, 10 requirements, 82 tests passing
+
+**Tech Stack:** Swift / SwiftUI + AppKit / AVFoundation / ScreenCaptureKit / Combine
+**Platform:** macOS 14.0+
+**Build System:** XcodeGen
+
+## Next Milestone Goals
+
+To be defined with `/gsd-new-milestone` — questioning → research → requirements → roadmap
 
 ## Constraints
 
@@ -63,7 +69,8 @@ User can start a recording in two clicks, monitor and adjust levels live, and re
 | SCKit for system audio (audio-only path) | Avoids window capture permissions complexity for audio-only use case | ✓ Good |
 | AVAudioEngine for mic | Established Apple API with stable tap interface; supports protocol injection for tests | ✓ Good |
 | Buffer-in-memory before write | Simple; sufficient for typical meeting lengths | — Pending (monitor for long recording sessions) |
-| Save location picker at finalize step | Lower friction during recording; decision deferred until user confirms they want to save | — Pending |
+| Save location picker at finalize step | Lower friction during recording; decision deferred until user confirms they want to save | ✓ Good — v1.0 shipped |
+| Two-step stop flow (stopCapture → finalize) | Allows directory selection before file write | ✓ Good — v1.0 shipped |
 
 ---
-*Last updated: 2026-03-18 after Phase 2 completion and project initialization*
+*Last updated: 2026-03-18 after v1.0 MVP milestone*
