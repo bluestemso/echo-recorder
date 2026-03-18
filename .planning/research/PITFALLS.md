@@ -1,57 +1,256 @@
-# Research: Pitfalls
+# Research: Common Pitfalls
 
-## Pitfall 1: Updating @Published from the Audio Thread
-**Risk:** `MeteringService` runs its tap block on a real-time audio thread. Directly writing a `@Published` property from outside `@MainActor` is a Swift 6 data race and a practical crash in earlier versions.
+## 1. SF Symbols in NSStatusItem
 
-**Prevention:**
-- Always dispatch meter updates to `DispatchQueue.main.async { }` before setting `@Published` properties
-- OR use `AsyncStream` + `MainActor` consumption pattern
-- **Phase impact:** Metering integration phase must explicitly handle this dispatch; unit tests should verify no main-thread violations
+### Pitfall: Template Images Override Color
+**Problem:** Using `.isTemplate = true` on SF Symbol images makes them monochrome, ignoring color settings.
 
----
+**Solution:**
+```swift
+// Don't set isTemplate for colored icons
+button.image = NSImage(systemSymbolName: "record.circle.fill", ...)
+// button.image?.isTemplate = true  // REMOVE THIS LINE
+```
 
-## Pitfall 2: Timer Accumulating After Recording Stops
-**Risk:** If the `Timer.publish` used to drive meter refresh is not cancelled when recording ends, it continues firing, causing zombie UI updates and possible retain cycles.
+### Pitfall: Image Sizing
+**Problem:** SF Symbols may render too large/small in status bar.
 
-**Prevention:**
-- Store `AnyCancellable` for the timer in `RecordingViewModel`
-- Cancel it in an `onStop()` or `deinit` path
-- Test: verify `levelRows` stop updating after `stopRecording()` is called
+**Solution:**
+```swift
+// Use SymbolConfiguration for precise sizing
+image.withSymbolConfiguration(
+    NSImage.SymbolConfiguration(pointSize: 14, weight: .medium)
+)
+```
 
----
+### Pitfall: Menu Bar Clipping
+**Problem:** Icons get clipped on screens with "automatic" menu bar location.
 
-## Pitfall 3: Gain Slider Causing Audio Engine Reconfiguration
-**Risk:** Plugging gain sliders directly into an `AVAudioMixerNode.outputVolume` is safe. But if someone mistakenly reconfigures the audio graph mid-stream (e.g., reconnecting nodes), `AVAudioEngine` will throw and the recording stops.
-
-**Prevention:**
-- Gain control should only modify `outputVolume` on a mixer node — never reconfigure the node graph during recording
-- The existing `AudioMixerService` already applies gain in-buffer before passing samples onward; keep this approach rather than inserting a graph-level node
-
----
-
-## Pitfall 4: NSOpenPanel Blocking Main Thread (runModal)
-**Risk:** `NSOpenPanel.runModal()` blocks the main thread. While this is the documented AppKit pattern, calling it inside a `Task` or `async` context without care can cause deadlocks.
-
-**Prevention:**
-- Call `panel.runModal()` from a synchronous button action (not inside `await`)
-- Wrap in a helper function called from SwiftUI's `.onReceive` or `Button { }` directly
-- Test: directory picker should not hang app during recording state
+**Solution:** Keep icon size 18x18pt max. Test on Retina/Non-Retina displays.
 
 ---
 
-## Pitfall 5: Save Directory URL Without Security-Scoped Bookmark
-**Risk:** On a sandboxed macOS app, URLs obtained from `NSOpenPanel` are only valid in the current session. If the app is sandboxed and the user picks a directory, a future launch won't have access if the URL isn't bookmarked.
+## 2. Recording State Indicator
 
-**Prevention:**
-- This app currently has `CODE_SIGNING_ALLOWED: NO` and is not sandboxed (from `project.yml`)
-- No sandbox bookmark required for current state
-- **If sandbox is added later:** must implement security-scoped bookmarks before release
+### Pitfall: Drawing on Wrong Thread
+**Problem:** `RecordingStatusView.draw()` may be called from wrong thread.
+
+**Solution:**
+```swift
+override func draw(_ dirtyRect: NSRect) {
+    DispatchQueue.main.async {
+        self.needsDisplay = true
+        return
+    }
+    // ... actual drawing on main thread
+}
+```
+
+### Pitfall: Redraw Not Triggering
+**Problem:** Background doesn't update when state changes.
+
+**Solution:** Call `needsDisplay = true` in property `didSet`:
+```swift
+var isRecording: Bool = false {
+    didSet {
+        needsDisplay = true
+    }
+}
+```
 
 ---
 
-## Pitfall 6: FinalizedAudioOutput Directory vs. Override Directory Confusion
-**Risk:** The current finalizer accepts `overrideDirectory: URL?` but defaults to `FileManager.default.temporaryDirectory`. If `AppSettings.defaultSaveDirectory` isn't plumbed in, recordings always land in `/tmp`, confusing users.
+## 3. Popover Design
 
-**Prevention:**
-- Wire `AppSettings.defaultSaveDirectory` to `RecordingFinalizer`'s default directory at initialization
-- The save location picker populates `overrideDirectory` only when the user explicitly changes the default
+### Pitfall: Z-Order with Overlay Views
+**Problem:** SwiftUI overlays (alerts, sheets) appear behind popover.
+
+**Solution:** Use `.zIndex()` modifier:
+```swift
+finalizeView
+    .zIndex(10)
+```
+
+### Pitfall: Content Size Not Updating
+**Problem:** Popover doesn't resize when content changes.
+
+**Solution:**
+```swift
+// In NSPopover:
+popover.contentSize = NSSize(width: 280, height: newHeight)
+
+// Or in SwiftUI:
+.id(viewModel.popoverContentID)  // Force rebuild on change
+```
+
+### Pitfall: Animation Stutter
+**Problem:** Animations stutter when heavy computation runs.
+
+**Solution:**
+- Keep animations on main thread
+- Use `Transaction.animation = nil` for instant changes
+- Defer non-critical updates
+
+---
+
+## 4. Popover Animation Speed
+
+### Pitfall: Animates Property Not Working
+**Problem:** `popover.animates = false` doesn't disable all animations.
+
+**Solution:**
+```swift
+// Also disable view animations:
+NSAnimationContext.current.allowsImplicitAnimation = false
+```
+
+### Pitfall: SwiftUI Animation Still Active
+**Problem:** SwiftUI `.animation()` modifier overrides `NSPopover.animates`.
+
+**Solution:** Use `animation(nil)` for specific views:
+```swift
+content
+    .animation(nil, value: shouldAnimate)
+```
+
+### Pitfall: Respects Reduce Motion
+**Problem:** Force-fast animations may violate accessibility settings.
+
+**Solution:**
+```swift
+@Environment(\.accessibilityReduceMotion) var reduceMotion
+
+if reduceMotion {
+    // Use instant transitions
+} else {
+    // Use animated transitions
+}
+```
+
+---
+
+## 5. Input Source Selection (Audio Device)
+
+### Pitfall: AVAudioEngine Device Change Requires Restart
+**Problem:** Setting new device while engine is running causes error.
+
+**Solution:**
+```swift
+func changeInputDevice(_ deviceID: AudioDeviceID) throws {
+    engine.stop()  // Stop first
+    engine.inputNode.removeTap(onBus: 0)
+    try engine.inputNode.auAudioUnit.setDeviceID(deviceID)
+    try engine.start()
+    installTap(currentHandler)
+}
+```
+
+### Pitfall: Bluetooth Audio Latency/Quality
+**Problem:** Bluetooth devices may have high latency, low quality, or disconnect.
+
+**Solution:**
+```swift
+// Check device transport type
+var propertyAddress = AudioObjectPropertyAddress(
+    mSelector: kAudioDevicePropertyTransportType,
+    mScope: kAudioObjectPropertyScopeGlobal,
+    mElement: kAudioObjectPropertyElementMain
+)
+var transportType: UInt32 = 0
+var dataSize = UInt32(MemoryLayout<UInt32>.size)
+AudioObjectGetPropertyData(deviceID, &propertyAddress, ...)
+
+// kAudioDeviceTransportTypeBluetooth = "bluetooth"
+// Show warning to user if Bluetooth selected
+```
+
+### Pitfall: Device Enumeration Race Condition
+**Problem:** Devices can connect/disconnect while enumerating.
+
+**Solution:**
+```swift
+// Register for device change notifications:
+AudioObjectAddPropertyListener(
+    AudioObjectID(kAudioObjectSystemObject),
+    &propertyAddress,
+    { deviceID, addresses, clientData in
+        // Post notification on main queue
+    }
+)
+```
+
+### Pitfall: Aggregate Devices on Apple Silicon
+**Problem:** Some USB/Bluetooth devices appear as aggregate, confusing enumeration.
+
+**Solution:**
+```swift
+// Filter aggregate devices:
+if transportType == kAudioDeviceTransportTypeUSB ||
+   transportType == kAudioDeviceTransportTypeBuiltIn ||
+   transportType == kAudioDeviceTransportTypeBluetooth {
+    // Include in list
+}
+```
+
+### Pitfall: Default Device Changes While App Running
+**Problem:** System default changes (e.g., headphones connected) affect our selection.
+
+**Solution:**
+```swift
+// Listen for default device changes:
+AudioObjectAddPropertyListener(
+    AudioObjectID(kAudioObjectSystemObject),
+    &kAudioHardwarePropertyDefaultInputDevice,
+    // Update UI to reflect system default
+)
+```
+
+### Pitfall: Permission Required for Non-Default Devices
+**Problem:**麦克风 permission may be requested again when switching devices.
+
+**Solution:**
+- Check permission status before starting capture
+- Request permission early (during device selection)
+- Show appropriate UI if permission denied
+
+---
+
+## General macOS Menu Bar App Pitfalls
+
+### Pitfall: App Sandbox Restrictions
+**Problem:** Sandbox may restrict CoreAudio access.
+
+**Solution:** Add entitlements:
+```xml
+<key>com.apple.security.device.audio-input</key>
+<true/>
+```
+
+### Pitfall: LSUIElement Not Set
+**Problem:** App appears in Dock when it should be menu bar only.
+
+**Solution:** In Info.plist:
+```xml
+<key>LSUIElement</key>
+<true/>
+```
+
+### Pitfall: Memory Pressure in Menu Bar Apps
+**Problem:** Menu bar apps are often kept running; memory leaks compound.
+
+**Solution:**
+- Use weak references where appropriate
+- Clean up timers and observers on deinit
+- Profile with Instruments regularly
+
+---
+
+## Testing Checklist
+
+- [ ] Test SF Symbols render correctly in light/dark mode
+- [ ] Test recording indicator on non-Retina displays
+- [ ] Test popover animation with accessibility Reduce Motion enabled
+- [ ] Test Bluetooth device disconnect during recording
+- [ ] Test with multiple audio devices connected/disconnected
+- [ ] Test memory usage over extended recording sessions
+- [ ] Test popover behavior with VoiceOver enabled
