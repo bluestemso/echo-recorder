@@ -8,7 +8,9 @@ struct RecordingPopoverView: View {
             ForEach(viewModel.levelRows, id: \.source) { row in
                 VStack(alignment: .leading, spacing: 4) {
                     Text(row.title)
-                    ProgressView(value: Double(row.level.peak), total: 1)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    LevelMeterView(level: row.level)
                 }
             }
 

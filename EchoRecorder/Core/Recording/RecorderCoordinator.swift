@@ -11,11 +11,16 @@ final class RecorderCoordinator: ObservableObject {
     @Published
     private(set) var state: RecorderState
 
+    var onMeterSnapshot: ((SourceLevel, SourceLevel) -> Void)?
+
     private var capture: any CaptureServicing
     private var mic: any MicCaptureServicing
     private let finalizer: any RecordingFinalizing
     private let permissionManager: any PermissionManaging
     private let recordingBufferStore = RecordingBufferStore()
+    private var latestSystemMeterLevel: SourceLevel = .zero
+    private var latestMicMeterLevel: SourceLevel = .zero
+    private let meteringService = MeteringService()
 
     init(
         initialState: RecorderState = .idle,
@@ -54,10 +59,22 @@ final class RecorderCoordinator: ObservableObject {
             recordingBufferStore.reset()
 
             capture.onSystemAudioSamples = { [weak self] sampleBuffer in
-                self?.recordingBufferStore.appendSystem(sampleBuffer)
+                guard let self else { return }
+                self.recordingBufferStore.appendSystem(sampleBuffer)
+                let level = self.meteringService.computeLevel(samples: sampleBuffer.samples)
+                DispatchQueue.main.async {
+                    self.latestSystemMeterLevel = level
+                    self.emitMeterSnapshot()
+                }
             }
             mic.onMicSamples = { [weak self] sampleBuffer in
-                self?.recordingBufferStore.appendMic(sampleBuffer)
+                guard let self else { return }
+                self.recordingBufferStore.appendMic(sampleBuffer)
+                let level = self.meteringService.computeLevel(samples: sampleBuffer.samples)
+                DispatchQueue.main.async {
+                    self.latestMicMeterLevel = level
+                    self.emitMeterSnapshot()
+                }
             }
 
             if profile.includeSystemAudio {
@@ -100,6 +117,9 @@ final class RecorderCoordinator: ObservableObject {
 
             capture.onSystemAudioSamples = nil
             mic.onMicSamples = nil
+            latestSystemMeterLevel = .zero
+            latestMicMeterLevel = .zero
+            onMeterSnapshot?(.zero, .zero)
 
             let recordingData = recordingBufferStore.snapshot()
 #if DEBUG
@@ -115,6 +135,9 @@ final class RecorderCoordinator: ObservableObject {
         } catch {
             capture.onSystemAudioSamples = nil
             mic.onMicSamples = nil
+            latestSystemMeterLevel = .zero
+            latestMicMeterLevel = .zero
+            onMeterSnapshot?(.zero, .zero)
             transition(to: .idle)
             throw error
         }
@@ -138,6 +161,10 @@ final class RecorderCoordinator: ObservableObject {
                 }
             }
         }
+    }
+
+    private func emitMeterSnapshot() {
+        onMeterSnapshot?(latestSystemMeterLevel, latestMicMeterLevel)
     }
 
     private func transition(to nextState: RecorderState) {

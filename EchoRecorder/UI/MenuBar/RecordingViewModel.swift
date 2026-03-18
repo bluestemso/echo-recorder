@@ -77,6 +77,11 @@ final class RecordingViewModel: ObservableObject {
             }
             .store(in: &cancellables)
 
+        recorderCoordinator?.onMeterSnapshot = { [weak self] systemLevel, micLevel in
+            // Already dispatched to main by RecorderCoordinator
+            self?.applyMeterSnapshot(system: systemLevel, mic: micLevel)
+        }
+
         if let recorderState = recorderCoordinator?.state {
             bindRecorderState(recorderState)
         }
@@ -90,6 +95,11 @@ final class RecordingViewModel: ObservableObject {
 
     func bindRecorderState(_ state: RecorderState) {
         isRecording = state == .preparing || state == .recording || state == .finalizing
+        if state == .idle {
+            levelRows = RecordingViewModel.InputSource.allCases.map { source in
+                LevelRow(source: source, title: source.title, level: .zero)
+            }
+        }
     }
 
     func setGain(_ value: Float, for source: InputSource) {
