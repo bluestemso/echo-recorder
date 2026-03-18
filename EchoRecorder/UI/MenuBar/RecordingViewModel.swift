@@ -195,7 +195,7 @@ final class RecordingViewModel: ObservableObject {
         }
     }
 
-    private static func makeSaveLocationService() -> SaveLocationService {
+    static func makeSaveLocationService() -> SaveLocationService {
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? FileManager.default.temporaryDirectory
         let store = JSONStore(baseDirectory: appSupport.appendingPathComponent("EchoRecorder", isDirectory: true))

@@ -127,6 +127,8 @@ private final class FakeMicService: MicCaptureServicing {
     func stopCapture() throws {
         isCapturing = false
     }
+
+    func selectDevice(_ device: AudioInputDevice) {}
 }
 
 private struct FakeRecordingFinalizer: RecordingFinalizing {

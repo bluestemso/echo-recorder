@@ -20,7 +20,7 @@ final class RecordingRuntimeFlowTests: XCTestCase {
         XCTAssertEqual(coordinator.state, .recording)
     }
 
-    func testSecondToggleStopsAndStoresFinalizedOutput() async {
+    func testSecondToggleStopsAndShowsFinalizePrompt() async {
         let coordinator = RecorderCoordinator(
             capture: FakeCaptureService(),
             mic: FakeMicService(),
@@ -32,6 +32,26 @@ final class RecordingRuntimeFlowTests: XCTestCase {
         viewModel.toggleRecording()
         try? await Task.sleep(nanoseconds: 100_000_000)
         viewModel.toggleRecording()
+        try? await Task.sleep(nanoseconds: 100_000_000)
+
+        XCTAssertEqual(coordinator.state, .pendingFinalize)
+        XCTAssertNotNil(viewModel.pendingFinalize)
+    }
+
+    func testConfirmFinalizeStoresOutputAndGoesIdle() async {
+        let coordinator = RecorderCoordinator(
+            capture: FakeCaptureService(),
+            mic: FakeMicService(),
+            finalizer: FakeRecordingFinalizer(),
+            permissionManager: AlwaysAuthorizedPermissionManager()
+        )
+        let viewModel = RecordingViewModel(recorderCoordinator: coordinator)
+
+        viewModel.toggleRecording()
+        try? await Task.sleep(nanoseconds: 100_000_000)
+        viewModel.toggleRecording()
+        try? await Task.sleep(nanoseconds: 100_000_000)
+        viewModel.confirmFinalize()
         try? await Task.sleep(nanoseconds: 100_000_000)
 
         XCTAssertEqual(coordinator.state, .idle)
@@ -64,6 +84,8 @@ private final class FakeMicService: MicCaptureServicing {
     func stopCapture() throws {
         isCapturing = false
     }
+
+    func selectDevice(_ device: AudioInputDevice) {}
 }
 
 private struct FakeRecordingFinalizer: RecordingFinalizing {

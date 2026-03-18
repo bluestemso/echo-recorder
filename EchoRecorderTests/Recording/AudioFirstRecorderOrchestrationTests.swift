@@ -100,6 +100,8 @@ private final class FakeMicService: MicCaptureServicing {
     func emit(samples: [Float]) {
         onMicSamples?(MicSampleBuffer(samples: samples, sampleRate: 48_000, channelCount: 1))
     }
+
+    func selectDevice(_ device: AudioInputDevice) {}
 }
 
 private struct FakeRecordingFinalizer: RecordingFinalizing {

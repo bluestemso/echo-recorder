@@ -39,6 +39,7 @@ final class MicCaptureServiceTests: XCTestCase {
 }
 
 private final class FakeMicEngine: MicCaptureEngine {
+    var selectedDeviceID: String?
     func installTap(_ handler: @escaping (MicSampleBuffer) -> Void) {}
 
     func removeTap() {}
@@ -46,4 +47,6 @@ private final class FakeMicEngine: MicCaptureEngine {
     func start() throws {}
 
     func stop() {}
+
+    func selectDevice(_ device: AudioInputDevice) {}
 }

@@ -90,7 +90,7 @@ final class RecorderCoordinator: ObservableObject {
 
             capture.onSystemAudioSamples = { [weak self] sampleBuffer in
                 guard let self else { return }
-                let gainedSamples = self.audioMixer.applyGain(to: sampleBuffer.samples, gain: self.systemGain)
+                let gainedSamples = sampleBuffer.samples.map { $0 * self.systemGain }
                 let gainedBuffer = SystemAudioSampleBuffer(
                     samples: gainedSamples,
                     sampleRate: sampleBuffer.sampleRate,
@@ -105,7 +105,7 @@ final class RecorderCoordinator: ObservableObject {
             }
             mic.onMicSamples = { [weak self] sampleBuffer in
                 guard let self else { return }
-                let gainedSamples = self.audioMixer.applyGain(to: sampleBuffer.samples, gain: self.micGain)
+                let gainedSamples = sampleBuffer.samples.map { $0 * self.micGain }
                 let gainedBuffer = MicSampleBuffer(
                     samples: gainedSamples,
                     sampleRate: sampleBuffer.sampleRate,

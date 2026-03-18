@@ -18,6 +18,7 @@ final class MicCaptureTapTests: XCTestCase {
 
 private final class FakeAudioEngine: MicCaptureEngine {
     var isStarted = false
+    var selectedDeviceID: String?
     private var tapHandler: ((MicSampleBuffer) -> Void)?
 
     func installTap(_ handler: @escaping (MicSampleBuffer) -> Void) {
@@ -35,6 +36,8 @@ private final class FakeAudioEngine: MicCaptureEngine {
     func stop() {
         isStarted = false
     }
+
+    func selectDevice(_ device: AudioInputDevice) {}
 
     func emitFakeInputBuffer() {
         tapHandler?(

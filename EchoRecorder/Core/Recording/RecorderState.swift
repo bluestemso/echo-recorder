@@ -3,4 +3,5 @@ enum RecorderState: Equatable {
     case preparing
     case recording
     case finalizing
+    case pendingFinalize
 }
