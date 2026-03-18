@@ -81,6 +81,8 @@ struct RecordingPopoverView: View {
                 }
             }
             .buttonStyle(.plain)
+            .contentShape(Rectangle())
+            .focusable(false)
 
             if isShowingInputSettings {
                 VStack(alignment: .leading, spacing: 8) {
