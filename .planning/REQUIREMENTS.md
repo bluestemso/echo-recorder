@@ -9,9 +9,9 @@
 - [x] **METER-04**: Meters update at approximately 50ms intervals (≤ 20fps refresh)
 
 ### Gain Control (GAIN)
-- [ ] **GAIN-01**: User can adjust the gain of the system audio source via a per-source slider in the recording popover
-- [ ] **GAIN-02**: User can adjust the gain of the microphone source via a per-source slider in the recording popover
-- [ ] **GAIN-03**: Changing a gain slider visibly affects the corresponding live meter in real-time
+- [x] **GAIN-01**: User can adjust the gain of the system audio source via a per-source slider in the recording popover
+- [x] **GAIN-02**: User can adjust the gain of the microphone source via a per-source slider in the recording popover
+- [x] **GAIN-03**: Changing a gain slider visibly affects the corresponding live meter in real-time
 
 ### Save Location (SAVE)
 - [ ] **SAVE-01**: User can choose an output directory during the finalize step before the recording is saved
@@ -48,9 +48,9 @@
 | METER-02 | Phase 1 | Complete |
 | METER-03 | Phase 1 | Complete |
 | METER-04 | Phase 1 | Complete |
-| GAIN-01 | Phase 2 | Pending |
-| GAIN-02 | Phase 2 | Pending |
-| GAIN-03 | Phase 2 | Pending |
+| GAIN-01 | Phase 2 | Complete |
+| GAIN-02 | Phase 2 | Complete |
+| GAIN-03 | Phase 2 | Complete |
 | SAVE-01 | Phase 3 | Pending |
 | SAVE-02 | Phase 3 | Pending |
 | SAVE-03 | Phase 3 | Pending |
