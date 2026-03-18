@@ -39,7 +39,7 @@ struct InputDevicePicker: View {
     let isEnabled: Bool
 
     var body: some View {
-        Picker("Input Device", selection: Binding(
+        Picker("", selection: Binding(
             get: { selectedDevice.id },
             set: { newId in
                 if let device = availableDevices.first(where: { $0.id == newId }) {
@@ -57,6 +57,8 @@ struct InputDevicePicker: View {
             }
         }
         .pickerStyle(.menu)
+        .labelsHidden()
+        .focusable(false)
         .disabled(!isEnabled)
     }
 }

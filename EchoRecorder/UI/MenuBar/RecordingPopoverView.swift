@@ -2,7 +2,6 @@ import SwiftUI
 
 struct RecordingPopoverView: View {
     @ObservedObject var viewModel: RecordingViewModel
-    @State private var isShowingInputSettings = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -19,9 +18,9 @@ struct RecordingPopoverView: View {
                     .cornerRadius(6)
             }
 
-            // Inline settings section - only visible when idle (not recording)
+            // Input device selector - only visible when idle
             if !viewModel.availableInputDevices.isEmpty && !viewModel.isRecording {
-                settingsSection
+                inputDeviceSection
             }
 
             ForEach(viewModel.levelRows, id: \.source) { row in
@@ -64,45 +63,21 @@ struct RecordingPopoverView: View {
     }
 
     @ViewBuilder
-    private var settingsSection: some View {
+    private var inputDeviceSection: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Button {
-                withAnimation(.easeInOut(duration: 0.15)) {
-                    isShowingInputSettings.toggle()
-                }
-            } label: {
-                HStack {
-                    Text("Input Settings")
-                        .font(.caption)
-                        .fontWeight(.medium)
-                    Spacer()
-                    Image(systemName: isShowingInputSettings ? "chevron.up" : "chevron.down")
-                        .font(.caption)
-                }
-            }
-            .buttonStyle(.plain)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .contentShape(Rectangle())
-            .focusable(false)
+            Text("Input Device")
+                .font(.caption)
+                .fontWeight(.medium)
 
-            if isShowingInputSettings {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Input Device")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-
-                    InputDevicePicker(
-                        selectedDevice: Binding(
-                            get: { viewModel.selectedDevice },
-                            set: { viewModel.setSelectedDevice($0) }
-                        ),
-                        availableDevices: viewModel.availableInputDevices,
-                        onDeviceSelected: { viewModel.setSelectedDevice($0) },
-                        isEnabled: !viewModel.isRecording
-                    )
-                }
-                .padding(.leading, 4)
-            }
+            InputDevicePicker(
+                selectedDevice: Binding(
+                    get: { viewModel.selectedDevice },
+                    set: { viewModel.setSelectedDevice($0) }
+                ),
+                availableDevices: viewModel.availableInputDevices,
+                onDeviceSelected: { viewModel.setSelectedDevice($0) },
+                isEnabled: !viewModel.isRecording
+            )
         }
         .padding(8)
         .background(Color(nsColor: .controlBackgroundColor).opacity(0.5))
