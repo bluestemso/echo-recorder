@@ -3,10 +3,10 @@
 ## v1 Requirements (Phase 3 Milestone)
 
 ### Live Metering (METER)
-- [ ] **METER-01**: User can see a live RMS/peak level bar for the system audio source while recording
-- [ ] **METER-02**: User can see a live RMS/peak level bar for the microphone source while recording
-- [ ] **METER-03**: Level bars are color-coded: green (safe), yellow (loud), red (clipping)
-- [ ] **METER-04**: Meters update at approximately 50ms intervals (≤ 20fps refresh)
+- [x] **METER-01**: User can see a live RMS/peak level bar for the system audio source while recording
+- [x] **METER-02**: User can see a live RMS/peak level bar for the microphone source while recording
+- [x] **METER-03**: Level bars are color-coded: green (safe), yellow (loud), red (clipping)
+- [x] **METER-04**: Meters update at approximately 50ms intervals (≤ 20fps refresh)
 
 ### Gain Control (GAIN)
 - [ ] **GAIN-01**: User can adjust the gain of the system audio source via a per-source slider in the recording popover
@@ -44,10 +44,10 @@
 
 | REQ-ID | Phase | Status |
 |--------|-------|--------|
-| METER-01 | Phase 1 | Pending |
-| METER-02 | Phase 1 | Pending |
-| METER-03 | Phase 1 | Pending |
-| METER-04 | Phase 1 | Pending |
+| METER-01 | Phase 1 | Complete |
+| METER-02 | Phase 1 | Complete |
+| METER-03 | Phase 1 | Complete |
+| METER-04 | Phase 1 | Complete |
 | GAIN-01 | Phase 2 | Pending |
 | GAIN-02 | Phase 2 | Pending |
 | GAIN-03 | Phase 2 | Pending |
