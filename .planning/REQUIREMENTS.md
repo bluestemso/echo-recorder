@@ -1,0 +1,92 @@
+# Requirements: EchoRecorder
+
+**Defined:** 2026-03-18
+**Core Value:** User can start a recording in two clicks, monitor and adjust levels live, and reliably get named, organized output files when they stop.
+
+## v1 Requirements (v2.0 Milestone)
+
+### Iconography (ICON)
+
+- [ ] **ICON-01**: Menu bar icon shows SF Symbol `waveform` or `mic.fill` when idle
+- [ ] **ICON-02**: Menu bar icon shows SF Symbol `record.circle.fill` (red) when recording
+- [ ] **ICON-03**: Menu bar icon changes based on recorder state (idle → preparing → recording → finalizing → idle)
+- [ ] **ICON-04**: Icon update occurs within 100ms of state change
+
+### Recording Indicator (IND)
+
+- [ ] **IND-01**: Menu bar status item shows red background/border when recording is active
+- [ ] **IND-02**: Red indicator is clearly visible against any desktop wallpaper
+- [ ] **IND-03**: Indicator is removed when recording stops
+
+### Popover Design (POPOV)
+
+- [ ] **POPOV-01**: FinalizeView shows larger, clearer action buttons
+- [ ] **POPOV-02**: FinalizeView shows progress indicator during save operation
+- [ ] **POPOV-03**: FinalizeView shows success feedback after recording is saved
+- [ ] **POPOV-04**: Smooth transition from recording view to finalize view
+- [ ] **POPOV-05**: Popover content transitions complete within 200ms
+
+### Animation Speed (ANIM)
+
+- [ ] **ANIM-01**: Popover appears instantly (no fade-in animation)
+- [ ] **ANIM-02**: Popover disappears instantly (no fade-out animation)
+- [ ] **ANIM-03**: Content transitions animate at 150ms duration
+
+### Input Source (INPUT)
+
+- [ ] **INPUT-01**: App displays available audio input devices in settings or recording UI
+- [ ] **INPUT-02**: User can select which audio input device to use for recording
+- [ ] **INPUT-03**: App defaults to built-in microphone when no device is manually selected
+- [ ] **INPUT-04**: App detects built-in microphone by checking device name for "Built-in", "MacBook", or "Internal Microphone"
+- [ ] **INPUT-05**: Input device selection persists across app launches
+- [ ] **INPUT-06**: App records microphone audio when Bluetooth headphones are connected (fix current bug)
+
+## v2 Requirements (Deferred)
+
+- Peak hold indicator on meter bars
+- Numerical dBFS readout alongside meter bars
+- Mute toggle per source
+- Clip/too-low warning badge UI
+
+## Out of Scope
+
+| Feature | Reason |
+|---------|--------|
+| Video recording | Explicitly deferred to future milestone |
+| Cloud sync / transcription | Out of scope, local-only tool |
+| Multiple simultaneous input devices | Single input source is sufficient for MVP |
+
+## Traceability
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| ICON-01 | Phase 4 | Pending |
+| ICON-02 | Phase 4 | Pending |
+| ICON-03 | Phase 4 | Pending |
+| ICON-04 | Phase 4 | Pending |
+| IND-01 | Phase 5 | Pending |
+| IND-02 | Phase 5 | Pending |
+| IND-03 | Phase 5 | Pending |
+| POPOV-01 | Phase 6 | Pending |
+| POPOV-02 | Phase 6 | Pending |
+| POPOV-03 | Phase 6 | Pending |
+| POPOV-04 | Phase 6 | Pending |
+| POPOV-05 | Phase 6 | Pending |
+| ANIM-01 | Phase 6 | Pending |
+| ANIM-02 | Phase 6 | Pending |
+| ANIM-03 | Phase 6 | Pending |
+| INPUT-01 | Phase 4 | Pending |
+| INPUT-02 | Phase 4 | Pending |
+| INPUT-03 | Phase 4 | Pending |
+| INPUT-04 | Phase 4 | Pending |
+| INPUT-05 | Phase 4 | Pending |
+| INPUT-06 | Phase 4 | Pending |
+
+**Coverage:**
+- v1 requirements: 19 total
+- Mapped to phases: 19
+- Unmapped: 0 ✓
+
+---
+*Requirements defined: 2026-03-18*
+*Last updated: 2026-03-18 after v2.0 milestone start*
