@@ -12,7 +12,7 @@
 
 **Requirements:** INPUT-01, INPUT-02, INPUT-03, INPUT-04, INPUT-05, INPUT-06
 
-**Plans:** 2/2 plans executed ✓
+**Plans:** 2/2 plans complete
 
 Plans:
 - [x] 04-01-PLAN.md — Backend: device enumeration, MicCaptureEngine protocol extension, InputDeviceService persistence, RecorderCoordinator wiring
