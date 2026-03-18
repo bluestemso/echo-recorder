@@ -1,4 +1,5 @@
 import AVFoundation
+import CoreAudio
 
 enum MicCaptureServiceError: Error, Equatable {
     case alreadyCapturing
@@ -10,6 +11,8 @@ protocol MicCaptureEngine: AnyObject {
     func removeTap()
     func start() throws
     func stop()
+    var selectedDeviceID: String? { get set }
+    func selectDevice(_ device: AudioInputDevice)
 }
 
 protocol MicCaptureServicing {
@@ -18,6 +21,7 @@ protocol MicCaptureServicing {
 
     func startCapture() throws
     func stopCapture() throws
+    func selectDevice(_ device: AudioInputDevice)
 }
 
 final class MicCaptureService: MicCaptureServicing {
@@ -26,6 +30,10 @@ final class MicCaptureService: MicCaptureServicing {
     private let engine: any MicCaptureEngine
 
     private(set) var isCapturing = false
+
+    func selectDevice(_ device: AudioInputDevice) {
+        engine.selectedDeviceID = device.uid
+    }
 
     init(engine: any MicCaptureEngine = AVAudioEngineAdapter()) {
         self.engine = engine
@@ -63,9 +71,16 @@ final class MicCaptureService: MicCaptureServicing {
 final class AVAudioEngineAdapter: MicCaptureEngine {
     private let audioEngine: AVAudioEngine
     private var didLogFirstTapSample = false
+    var selectedDeviceID: String?
+
+    private var originalDefaultInputDevice: AudioObjectID = kAudioObjectUnknown
 
     init(audioEngine: AVAudioEngine = AVAudioEngine()) {
         self.audioEngine = audioEngine
+    }
+
+    func selectDevice(_ device: AudioInputDevice) {
+        selectedDeviceID = device.uid
     }
 
     func installTap(_ handler: @escaping (MicSampleBuffer) -> Void) {
@@ -106,10 +121,103 @@ final class AVAudioEngineAdapter: MicCaptureEngine {
     }
 
     func start() throws {
+        // Apply device selection before starting engine
+        if let uid = selectedDeviceID, !uid.isEmpty, uid != "default" {
+            setInputDevice(deviceUID: uid)
+        }
         try audioEngine.start()
     }
 
     func stop() {
         audioEngine.stop()
+        restoreOriginalDefaultInputDevice()
+    }
+
+    private func setInputDevice(deviceUID: String) {
+        guard let deviceID = resolveDeviceID(from: deviceUID) else {
+            print("[CaptureDebug] Could not resolve device UID: \(deviceUID)")
+            return
+        }
+        // Store current default so we can restore it
+        originalDefaultInputDevice = getDefaultInputDevice()
+
+        var address = AudioObjectPropertyAddress(
+            mSelector: kAudioHardwarePropertyDefaultInputDevice,
+            mScope: kAudioObjectPropertyScopeGlobal,
+            mElement: kAudioObjectPropertyElementMain
+        )
+        var newDevice = deviceID
+        let status = AudioObjectSetPropertyData(
+            AudioObjectID(kAudioObjectSystemObject),
+            &address,
+            0,
+            nil,
+            UInt32(MemoryLayout<AudioObjectID>.size),
+            &newDevice
+        )
+        if status == noErr {
+            print("[CaptureDebug] Set default input device to UID: \(deviceUID)")
+        } else {
+            print("[CaptureDebug] Failed to set default input device, status: \(status)")
+        }
+    }
+
+    private func restoreOriginalDefaultInputDevice() {
+        guard originalDefaultInputDevice != kAudioObjectUnknown else { return }
+
+        var address = AudioObjectPropertyAddress(
+            mSelector: kAudioHardwarePropertyDefaultInputDevice,
+            mScope: kAudioObjectPropertyScopeGlobal,
+            mElement: kAudioObjectPropertyElementMain
+        )
+        var deviceID = originalDefaultInputDevice
+        AudioObjectSetPropertyData(
+            AudioObjectID(kAudioObjectSystemObject),
+            &address,
+            0,
+            nil,
+            UInt32(MemoryLayout<AudioObjectID>.size),
+            &deviceID
+        )
+        originalDefaultInputDevice = kAudioObjectUnknown
+    }
+
+    private func getDefaultInputDevice() -> AudioObjectID {
+        var address = AudioObjectPropertyAddress(
+            mSelector: kAudioHardwarePropertyDefaultInputDevice,
+            mScope: kAudioObjectPropertyScopeGlobal,
+            mElement: kAudioObjectPropertyElementMain
+        )
+        var deviceID: AudioObjectID = kAudioObjectUnknown
+        var size = UInt32(MemoryLayout<AudioObjectID>.size)
+        AudioObjectGetPropertyData(
+            AudioObjectID(kAudioObjectSystemObject),
+            &address,
+            0,
+            nil,
+            &size,
+            &deviceID
+        )
+        return deviceID
+    }
+
+    private func resolveDeviceID(from uid: String) -> AudioObjectID? {
+        var address = AudioObjectPropertyAddress(
+            mSelector: kAudioHardwarePropertyDeviceForUID,
+            mScope: kAudioObjectPropertyScopeGlobal,
+            mElement: kAudioObjectPropertyElementMain
+        )
+        var deviceID: AudioObjectID = 0
+        var size = UInt32(MemoryLayout<AudioObjectID>.size)
+        var uidRef = uid as CFString
+        let status = AudioObjectGetPropertyData(
+            AudioObjectID(kAudioObjectSystemObject),
+            &address,
+            0,
+            nil,
+            &size,
+            &deviceID
+        )
+        return status == noErr ? deviceID : nil
     }
 }
