@@ -1,4 +1,5 @@
 import AVFoundation
+import CoreGraphics
 
 protocol PermissionManaging {
     func status(for permission: PermissionType) -> PermissionStatus
@@ -32,7 +33,9 @@ struct PermissionManager: PermissionManaging {
         switch permission {
         case .microphone:
             return map(AVCaptureDevice.authorizationStatus(for: .audio))
-        case .screenRecording, .accessibility:
+        case .screenRecording:
+            return CGPreflightScreenCaptureAccess() ? .authorized : .notDetermined
+        case .accessibility:
             return .notDetermined
         }
     }
@@ -46,7 +49,9 @@ struct PermissionManager: PermissionManaging {
                 }
             }
             return granted ? .authorized : .denied
-        case .screenRecording, .accessibility:
+        case .screenRecording:
+            return CGRequestScreenCaptureAccess() ? .authorized : .denied
+        case .accessibility:
             return liveStatus(for: permission)
         }
     }

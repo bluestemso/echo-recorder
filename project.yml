@@ -12,6 +12,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.echo.recorder.app
         GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_NSMicrophoneUsageDescription: Echo Recorder needs microphone access to capture your voice during recordings.
         INFOPLIST_KEY_LSUIElement: YES
         CODE_SIGNING_ALLOWED: NO
   EchoRecorderTests:

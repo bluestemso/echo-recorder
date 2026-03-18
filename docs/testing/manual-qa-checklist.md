@@ -18,8 +18,9 @@
 ## Finalization flow
 
 - [ ] Finalize a recording with a valid name like `qa-sample`.
-- [ ] Verify a folder named `qa-sample` appears in the configured save directory.
+- [ ] Verify a folder named `qa-sample` appears in the save directory (default: `~/Downloads`).
 - [ ] Verify the folder contains `mixed.m4a`, `system_audio.m4a`, and `mic_audio.m4a`.
+- [ ] Verify no save picker is shown yet (current MVP auto-saves by default path logic).
 - [ ] Try an invalid filename like `../bad-name` and verify finalization fails with validation.
 
 ## Audio quality checks
@@ -27,6 +28,12 @@
 - [ ] Record with only microphone input and verify `mic_audio.m4a` has audible speech.
 - [ ] Record with only system playback and verify `system_audio.m4a` has audible app/system sound.
 - [ ] Verify `mixed.m4a` contains both sources when both are active.
+- [ ] Verify each generated audio file has non-zero duration (QuickTime inspector or `afinfo <path>`).
+
+## Automated smoke harness
+
+- [ ] Run synthetic harness: `xcodebuild test -project EchoRecorder.xcodeproj -scheme EchoRecorder -destination 'platform=macOS' -only-testing:EchoRecorderTests/AudioRecordingHarnessTests/testSyntheticHarnessProducesReadableM4AArtifacts`
+- [ ] Run live harness: create `/tmp/echo-run-live-harness`, run `xcodebuild test -project EchoRecorder.xcodeproj -scheme EchoRecorder -destination 'platform=macOS' -only-testing:EchoRecorderTests/AudioRecordingHarnessTests/testLiveHarnessProducesNonZeroDurationWhenEnabled`, then remove the marker file.
 
 ## Regression spot checks
 

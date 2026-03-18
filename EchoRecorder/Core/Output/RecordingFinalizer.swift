@@ -1,7 +1,14 @@
 import Foundation
 
+@MainActor
 protocol RecordingFinalizing {
-    func finalize(fileName: String, overrideDirectory: URL?) throws -> FinalizedAudioOutput
+    func finalize(fileName: String, overrideDirectory: URL?, recordingData: RecordingAudioData) throws -> FinalizedAudioOutput
+}
+
+extension RecordingFinalizing {
+    func finalize(fileName: String, overrideDirectory: URL?) throws -> FinalizedAudioOutput {
+        try finalize(fileName: fileName, overrideDirectory: overrideDirectory, recordingData: .empty)
+    }
 }
 
 enum RecordingFinalizerError: Error, Equatable {
@@ -14,9 +21,21 @@ struct RecordingFinalizer {
     let defaultDirectory: URL
 
     func finalize(fileName: String, overrideDirectory: URL?) throws -> FinalizedAudioOutput {
+        try finalize(fileName: fileName, overrideDirectory: overrideDirectory, recordingData: .empty)
+    }
+
+    func finalize(
+        fileName: String,
+        overrideDirectory: URL?,
+        recordingData: RecordingAudioData
+    ) throws -> FinalizedAudioOutput {
         let sanitizedFileName = try validate(fileName: fileName)
         let directory = overrideDirectory ?? defaultDirectory
-        return try fileWriter.output(fileName: sanitizedFileName, directory: directory)
+        return try fileWriter.output(
+            fileName: sanitizedFileName,
+            directory: directory,
+            recordingData: recordingData
+        )
     }
 
     private func validate(fileName: String) throws -> String {

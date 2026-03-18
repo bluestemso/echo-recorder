@@ -62,6 +62,7 @@ final class MicCaptureService: MicCaptureServicing {
 
 final class AVAudioEngineAdapter: MicCaptureEngine {
     private let audioEngine: AVAudioEngine
+    private var didLogFirstTapSample = false
 
     init(audioEngine: AVAudioEngine = AVAudioEngine()) {
         self.audioEngine = audioEngine
@@ -71,21 +72,24 @@ final class AVAudioEngineAdapter: MicCaptureEngine {
         let inputNode = audioEngine.inputNode
         let inputFormat = inputNode.inputFormat(forBus: 0)
 
+#if DEBUG
+        print("[CaptureDebug] Mic tap format sampleRate=\(inputFormat.sampleRate) channels=\(inputFormat.channelCount) commonFormat=\(inputFormat.commonFormat.rawValue) interleaved=\(inputFormat.isInterleaved)")
+#endif
+
         inputNode.installTap(onBus: 0, bufferSize: 1_024, format: inputFormat) { buffer, _ in
-            guard let channelData = buffer.floatChannelData else {
+            let samples = PCMBufferSampleExtractor.extractInterleavedFloatSamples(from: buffer)
+            guard !samples.isEmpty else {
                 return
             }
 
-            let frameLength = Int(buffer.frameLength)
-            let channelCount = Int(buffer.format.channelCount)
-            var samples: [Float] = []
-            samples.reserveCapacity(frameLength * max(channelCount, 1))
-
-            for frame in 0..<frameLength {
-                for channel in 0..<channelCount {
-                    samples.append(channelData[channel][frame])
-                }
+#if DEBUG
+            if !self.didLogFirstTapSample {
+                self.didLogFirstTapSample = true
+                print("[CaptureDebug] Mic tap received first sample chunk count=\(samples.count) sampleRate=\(buffer.format.sampleRate) channels=\(buffer.format.channelCount)")
             }
+#endif
+
+            let channelCount = Int(buffer.format.channelCount)
 
             handler(
                 MicSampleBuffer(

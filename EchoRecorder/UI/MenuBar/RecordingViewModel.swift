@@ -27,6 +27,8 @@ final class RecordingViewModel: ObservableObject {
         LevelRow(source: source, title: source.title, level: .zero)
     }
     @Published private(set) var isRecording = false
+    @Published private(set) var lastFinalizedOutput: FinalizedAudioOutput?
+    @Published private(set) var latestErrorDescription: String?
 
     var primaryActionTitle: String {
         isRecording ? "Stop Recording" : "Start Recording"
@@ -34,19 +36,38 @@ final class RecordingViewModel: ObservableObject {
 
     private let onStartRecording: () -> Void
     private let onStopRecording: () -> Void
+    private let profileProvider: () -> Profile
+    private let outputDirectoryProvider: () -> URL?
+    private let recordingNameProvider: () -> String
     private let audioMixer: any AudioMixing
     private weak var recorderCoordinator: RecorderCoordinator?
     private var cancellables: Set<AnyCancellable> = []
     private var sourceGain = SourceGain.unity
+    private var activeRecordingName: String?
 
     init(
         recorderCoordinator: RecorderCoordinator? = nil,
         audioMixer: any AudioMixing = AudioMixerService(),
+        profileProvider: @escaping () -> Profile = {
+            Profile(id: "default", name: "Default")
+        },
+        outputDirectoryProvider: @escaping () -> URL? = {
+            FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask).first
+                ?? FileManager.default.temporaryDirectory
+        },
+        recordingNameProvider: @escaping () -> String = {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd-HHmmss"
+            return "Echo-\(formatter.string(from: Date()))"
+        },
         onStartRecording: @escaping () -> Void = {},
         onStopRecording: @escaping () -> Void = {}
     ) {
         self.recorderCoordinator = recorderCoordinator
         self.audioMixer = audioMixer
+        self.profileProvider = profileProvider
+        self.outputDirectoryProvider = outputDirectoryProvider
+        self.recordingNameProvider = recordingNameProvider
         self.onStartRecording = onStartRecording
         self.onStopRecording = onStopRecording
 
@@ -91,16 +112,61 @@ final class RecordingViewModel: ObservableObject {
     func toggleRecording() {
         if isRecording {
             if let recorderCoordinator {
-                recorderCoordinator.stopRecording()
+                Task { [weak self] in
+                    await self?.stopRecording(using: recorderCoordinator)
+                }
             } else {
                 onStopRecording()
             }
         } else {
             if let recorderCoordinator {
-                recorderCoordinator.startRecording()
+                Task { [weak self] in
+                    await self?.startRecording(using: recorderCoordinator)
+                }
             } else {
                 onStartRecording()
             }
+        }
+    }
+
+    private func startRecording(using coordinator: RecorderCoordinator) async {
+        let profile = profileProvider()
+        let recordingName = recordingNameProvider()
+        activeRecordingName = recordingName
+
+        do {
+            try await coordinator.startAudioRecording(profile: profile)
+#if DEBUG
+            print("[CaptureDebug] startRecording succeeded name=\(recordingName)")
+#endif
+        } catch {
+            latestErrorDescription = error.localizedDescription
+            activeRecordingName = nil
+#if DEBUG
+            print("[CaptureDebug] startRecording failed error=\(error)")
+#endif
+        }
+    }
+
+    private func stopRecording(using coordinator: RecorderCoordinator) async {
+        let recordingName = activeRecordingName ?? recordingNameProvider()
+
+        do {
+            lastFinalizedOutput = try await coordinator.stopAndFinalize(
+                recordingName: recordingName,
+                overrideDirectory: outputDirectoryProvider()
+            )
+            activeRecordingName = nil
+#if DEBUG
+            if let output = lastFinalizedOutput {
+                print("[CaptureDebug] stopRecording finalized mixed=\(output.mixed.path) system=\(output.system.path) mic=\(output.mic.path)")
+            }
+#endif
+        } catch {
+            latestErrorDescription = error.localizedDescription
+#if DEBUG
+            print("[CaptureDebug] stopRecording failed error=\(error)")
+#endif
         }
     }
 }

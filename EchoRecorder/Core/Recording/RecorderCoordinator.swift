@@ -1,20 +1,28 @@
 import Combine
 import Foundation
 
+enum RecorderCoordinatorError: Error {
+    case microphonePermissionDenied
+    case screenRecordingPermissionDenied
+}
+
 @MainActor
 final class RecorderCoordinator: ObservableObject {
     @Published
     private(set) var state: RecorderState
 
-    private let capture: any CaptureServicing
-    private let mic: any MicCaptureServicing
+    private var capture: any CaptureServicing
+    private var mic: any MicCaptureServicing
     private let finalizer: any RecordingFinalizing
+    private let permissionManager: any PermissionManaging
+    private let recordingBufferStore = RecordingBufferStore()
 
     init(
         initialState: RecorderState = .idle,
         capture: (any CaptureServicing)? = nil,
         mic: (any MicCaptureServicing)? = nil,
-        finalizer: (any RecordingFinalizing)? = nil
+        finalizer: (any RecordingFinalizing)? = nil,
+        permissionManager: (any PermissionManaging)? = nil
     ) {
         state = initialState
         self.capture = capture ?? CaptureService()
@@ -23,6 +31,7 @@ final class RecorderCoordinator: ObservableObject {
             fileWriter: FileWriterService(),
             defaultDirectory: FileManager.default.temporaryDirectory
         )
+        self.permissionManager = permissionManager ?? PermissionManager()
     }
 
     func startRecording() {
@@ -41,6 +50,16 @@ final class RecorderCoordinator: ObservableObject {
         transition(to: .preparing)
 
         do {
+            try await requestPermissions(for: profile)
+            recordingBufferStore.reset()
+
+            capture.onSystemAudioSamples = { [weak self] sampleBuffer in
+                self?.recordingBufferStore.appendSystem(sampleBuffer)
+            }
+            mic.onMicSamples = { [weak self] sampleBuffer in
+                self?.recordingBufferStore.appendMic(sampleBuffer)
+            }
+
             if profile.includeSystemAudio {
                 try await capture.startCapture(source: .systemAudio)
             }
@@ -59,6 +78,9 @@ final class RecorderCoordinator: ObservableObject {
                 try? await capture.stopCapture()
             }
 
+            capture.onSystemAudioSamples = nil
+            mic.onMicSamples = nil
+
             transition(to: .idle)
             throw error
         }
@@ -76,12 +98,45 @@ final class RecorderCoordinator: ObservableObject {
                 try await capture.stopCapture()
             }
 
-            let output = try finalizer.finalize(fileName: recordingName, overrideDirectory: overrideDirectory)
+            capture.onSystemAudioSamples = nil
+            mic.onMicSamples = nil
+
+            let recordingData = recordingBufferStore.snapshot()
+#if DEBUG
+            print("[CaptureDebug] Finalize snapshot systemSamples=\(recordingData.system.samples.count) micSamples=\(recordingData.mic.samples.count) systemRate=\(recordingData.system.sampleRate) micRate=\(recordingData.mic.sampleRate)")
+#endif
+            let output = try finalizer.finalize(
+                fileName: recordingName,
+                overrideDirectory: overrideDirectory,
+                recordingData: recordingData
+            )
             transition(to: .idle)
             return output
         } catch {
+            capture.onSystemAudioSamples = nil
+            mic.onMicSamples = nil
             transition(to: .idle)
             throw error
+        }
+    }
+
+    private func requestPermissions(for profile: Profile) async throws {
+        let micStatus = permissionManager.status(for: .microphone)
+        if micStatus != .authorized {
+            let requestStatus = await permissionManager.request(.microphone)
+            guard requestStatus == .authorized else {
+                throw RecorderCoordinatorError.microphonePermissionDenied
+            }
+        }
+
+        if profile.includeSystemAudio {
+            let systemStatus = permissionManager.status(for: .screenRecording)
+            if systemStatus != .authorized {
+                let requestStatus = await permissionManager.request(.screenRecording)
+                guard requestStatus == .authorized else {
+                    throw RecorderCoordinatorError.screenRecordingPermissionDenied
+                }
+            }
         }
     }
 
@@ -110,5 +165,64 @@ final class RecorderCoordinator: ObservableObject {
         default:
             return false
         }
+    }
+}
+
+private final class RecordingBufferStore {
+    private let lock = NSLock()
+
+    private var systemSamples: [Float] = []
+    private var micSamples: [Float] = []
+    private var systemSampleRate: Double = 48_000
+    private var micSampleRate: Double = 48_000
+    private var systemChannelCount = 1
+    private var micChannelCount = 1
+
+    func reset() {
+        lock.lock()
+        defer { lock.unlock() }
+
+        systemSamples.removeAll(keepingCapacity: true)
+        micSamples.removeAll(keepingCapacity: true)
+        systemSampleRate = 48_000
+        micSampleRate = 48_000
+        systemChannelCount = 1
+        micChannelCount = 1
+    }
+
+    func appendSystem(_ buffer: SystemAudioSampleBuffer) {
+        lock.lock()
+        defer { lock.unlock() }
+
+        systemSamples.append(contentsOf: buffer.samples)
+        systemSampleRate = buffer.sampleRate
+        systemChannelCount = max(buffer.channelCount, 1)
+    }
+
+    func appendMic(_ buffer: MicSampleBuffer) {
+        lock.lock()
+        defer { lock.unlock() }
+
+        micSamples.append(contentsOf: buffer.samples)
+        micSampleRate = buffer.sampleRate
+        micChannelCount = max(buffer.channelCount, 1)
+    }
+
+    func snapshot() -> RecordingAudioData {
+        lock.lock()
+        defer { lock.unlock() }
+
+        return RecordingAudioData(
+            system: SystemAudioSampleBuffer(
+                samples: systemSamples,
+                sampleRate: systemSampleRate,
+                channelCount: systemChannelCount
+            ),
+            mic: MicSampleBuffer(
+                samples: micSamples,
+                sampleRate: micSampleRate,
+                channelCount: micChannelCount
+            )
+        )
     }
 }

@@ -6,6 +6,7 @@ enum CaptureServiceError: Error, Equatable {
 @MainActor
 protocol CaptureServicing {
     var isRunning: Bool { get }
+    var onSystemAudioSamples: ((SystemAudioSampleBuffer) -> Void)? { get set }
 
     func startCapture(source: CaptureSourceDescriptor) async throws
     func stopCapture() async throws

@@ -16,6 +16,7 @@
 		263B2E99D9CD78EFAB5C209F /* AudioFirstRecorderOrchestrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56FEFE0A095EB3407C35B4ED /* AudioFirstRecorderOrchestrationTests.swift */; };
 		2A7DA41003947B45103068D7 /* PermissionWizardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3E88DB6A927C5623DBD597B /* PermissionWizardViewModel.swift */; };
 		2FB80BDAB91A267F1777E49A /* EchoRecorderApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 488484FA5CC27CD71368FA37 /* EchoRecorderApp.swift */; };
+		2FED3088D1B76A04EE6A7B47 /* PCMBufferSampleExtractorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A05F07121CAA3ECD04D235DD /* PCMBufferSampleExtractorTests.swift */; };
 		315BE5131A565C25718C4A3B /* SystemAudioCaptureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2458A486E78EF815C9FA695 /* SystemAudioCaptureTests.swift */; };
 		38066617EC4CD689F9A98C48 /* RecordingFinalizerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C4DE6555B5C4420A0265598 /* RecordingFinalizerTests.swift */; };
 		3B33518F3BC35ABCDB49C997 /* PermissionManagerAudioTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF513061A47806BE37C7AE0B /* PermissionManagerAudioTests.swift */; };
@@ -35,17 +36,21 @@
 		78A0925C14F1A317D2F88EAB /* RecordingPopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 119614477008C7EF2D9844DC /* RecordingPopoverView.swift */; };
 		7D88B0CD62FC6653A2555C41 /* StatusItemController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7610882E656EEDB651D39D1C /* StatusItemController.swift */; };
 		7F60F8511C3B19A5DAAA7A50 /* ScreenCaptureKitAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FB532A8DF5DDED00B0E43BF /* ScreenCaptureKitAdapter.swift */; };
+		7FD1747B8F2D6E5F6105C359 /* AudioRecordingHarnessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B88B4718B95D16268668522 /* AudioRecordingHarnessTests.swift */; };
 		879FDFC00A09AC447AFF9EDD /* RecordingFinalizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5520D029B75CADD26FE8195D /* RecordingFinalizer.swift */; };
 		89468174094EC41228F78827 /* JSONStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 768F9C63216C5D7E8FFF2AE5 /* JSONStore.swift */; };
 		8BE1669AAC3650C5E7F25033 /* RecordingViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 534DDD957EFE75C498873895 /* RecordingViewModelTests.swift */; };
+		911EC288C33CD058DF156446 /* RecordingRuntimeFlowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30C140C3D463D6E799B18EE4 /* RecordingRuntimeFlowTests.swift */; };
 		91892A09D6524DF2F932FECB /* RecoveryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3564CCD2807A4A6304BF92E /* RecoveryService.swift */; };
 		925A5A1C3176D1313B9D7ABC /* MicSampleBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F1785BBE0857D6E69EDCD11 /* MicSampleBuffer.swift */; };
 		A693CD7E546707E04BA112C3 /* FileWriterService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0428543066EEF96D223A7633 /* FileWriterService.swift */; };
+		A796DA1411210DB966D42347 /* RecordingAudioData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 947EC3DB590771608A94A3EE /* RecordingAudioData.swift */; };
 		A8226BB4123871A676923939 /* RecorderCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37F1BF1E13C7084F48A31F21 /* RecorderCoordinator.swift */; };
 		B74CD5D58F83890B9A15C265 /* MicCaptureServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E77810D5B3D56DB864CFEC25 /* MicCaptureServiceTests.swift */; };
 		BC003E418C2D69081B49A9E4 /* MeteringService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D3CB7081EE7972C273CA0E9 /* MeteringService.swift */; };
 		CCFDF127F49A1FEDBFC8F7C6 /* RecordingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CF2F94C4BC4ABB07D4007CC /* RecordingViewModel.swift */; };
 		D1E0F7FBBB944A65DA7A5C34 /* RecordingManifest.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1BC112390B33B671F3E72E1 /* RecordingManifest.swift */; };
+		D231D4DCAD86E40E69069419 /* PCMBufferSampleExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EA4B7BB90C34D1A3E9E11E9 /* PCMBufferSampleExtractor.swift */; };
 		DA41D8DF6D0BD39E67C40296 /* CaptureServiceContractTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3721663DE9ADCB2FD76FF2A /* CaptureServiceContractTests.swift */; };
 		E1E3705F5D131A84085F2083 /* RecoveryServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CF4F92948B0320F624A082F /* RecoveryServiceTests.swift */; };
 		E8EFCF5633E45CD06DA9A423 /* MicCaptureTapTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CAB16EBE31508503DB199F1 /* MicCaptureTapTests.swift */; };
@@ -74,9 +79,11 @@
 		108D010B580B761ECDDC6574 /* FinalizeRecordingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinalizeRecordingViewModel.swift; sourceTree = "<group>"; };
 		119614477008C7EF2D9844DC /* RecordingPopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingPopoverView.swift; sourceTree = "<group>"; };
 		1C4DE6555B5C4420A0265598 /* RecordingFinalizerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingFinalizerTests.swift; sourceTree = "<group>"; };
+		1EA4B7BB90C34D1A3E9E11E9 /* PCMBufferSampleExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCMBufferSampleExtractor.swift; sourceTree = "<group>"; };
 		242021D3CB0AF248D4723CA1 /* Profile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Profile.swift; sourceTree = "<group>"; };
 		2757952EC87C44D4BB0AD870 /* AudioMixerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioMixerService.swift; sourceTree = "<group>"; };
 		30BD29EA274CFBE5DC5B68EE /* RecordingFlowIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingFlowIntegrationTests.swift; sourceTree = "<group>"; };
+		30C140C3D463D6E799B18EE4 /* RecordingRuntimeFlowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingRuntimeFlowTests.swift; sourceTree = "<group>"; };
 		3693E322A4AF91EF2956C07A /* MicCaptureService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicCaptureService.swift; sourceTree = "<group>"; };
 		37F1BF1E13C7084F48A31F21 /* RecorderCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecorderCoordinator.swift; sourceTree = "<group>"; };
 		3EB84086FD0BD09B4C3B684B /* AudioWriterPipelineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioWriterPipelineTests.swift; sourceTree = "<group>"; };
@@ -100,8 +107,11 @@
 		8E980646936FA81D1794D57E /* AudioGainPipelineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioGainPipelineTests.swift; sourceTree = "<group>"; };
 		8FB532A8DF5DDED00B0E43BF /* ScreenCaptureKitAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenCaptureKitAdapter.swift; sourceTree = "<group>"; };
 		90BF879CA37B90964B847B95 /* JSONStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONStoreTests.swift; sourceTree = "<group>"; };
+		947EC3DB590771608A94A3EE /* RecordingAudioData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingAudioData.swift; sourceTree = "<group>"; };
+		9B88B4718B95D16268668522 /* AudioRecordingHarnessTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRecordingHarnessTests.swift; sourceTree = "<group>"; };
 		9CF4F92948B0320F624A082F /* RecoveryServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryServiceTests.swift; sourceTree = "<group>"; };
 		9EAED96A97BE451161047C2A /* SystemAudioSampleBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemAudioSampleBuffer.swift; sourceTree = "<group>"; };
+		A05F07121CAA3ECD04D235DD /* PCMBufferSampleExtractorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCMBufferSampleExtractorTests.swift; sourceTree = "<group>"; };
 		A2458A486E78EF815C9FA695 /* SystemAudioCaptureTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemAudioCaptureTests.swift; sourceTree = "<group>"; };
 		A3564CCD2807A4A6304BF92E /* RecoveryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryService.swift; sourceTree = "<group>"; };
 		A56ADCE7F38F9A7D3D63F9DC /* CaptureSourceDescriptor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureSourceDescriptor.swift; sourceTree = "<group>"; };
@@ -124,6 +134,7 @@
 		09D15E40DE80E55C11A15CA8 /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				30C140C3D463D6E799B18EE4 /* RecordingRuntimeFlowTests.swift */,
 				534DDD957EFE75C498873895 /* RecordingViewModelTests.swift */,
 			);
 			path = UI;
@@ -145,6 +156,7 @@
 				5FCC9910F3EE9CD460A38BAB /* MeteringServiceTests.swift */,
 				E77810D5B3D56DB864CFEC25 /* MicCaptureServiceTests.swift */,
 				4CAB16EBE31508503DB199F1 /* MicCaptureTapTests.swift */,
+				A05F07121CAA3ECD04D235DD /* PCMBufferSampleExtractorTests.swift */,
 			);
 			path = Audio;
 			sourceTree = "<group>";
@@ -156,6 +168,14 @@
 				A9C89E4765DAE45CEB8581B5 /* PermissionWizardViewModelTests.swift */,
 			);
 			path = Permissions;
+			sourceTree = "<group>";
+		};
+		1D61F40720C491BD9184CB6B /* Smoke */ = {
+			isa = PBXGroup;
+			children = (
+				9B88B4718B95D16268668522 /* AudioRecordingHarnessTests.swift */,
+			);
+			path = Smoke;
 			sourceTree = "<group>";
 		};
 		20401DCFAA14395EC178C5CA /* Models */ = {
@@ -224,6 +244,7 @@
 				0A79DFC220E989B1C3E84331 /* Persistence */,
 				44986DCFDF5FB75D6459CC6A /* Recording */,
 				CC71FC254ECB64379B2CD5B5 /* Recovery */,
+				1D61F40720C491BD9184CB6B /* Smoke */,
 				09D15E40DE80E55C11A15CA8 /* UI */,
 			);
 			path = EchoRecorderTests;
@@ -236,6 +257,7 @@
 				8D3CB7081EE7972C273CA0E9 /* MeteringService.swift */,
 				3693E322A4AF91EF2956C07A /* MicCaptureService.swift */,
 				0F1785BBE0857D6E69EDCD11 /* MicSampleBuffer.swift */,
+				1EA4B7BB90C34D1A3E9E11E9 /* PCMBufferSampleExtractor.swift */,
 				6FC2406C1D5483DFF81272FE /* SourceLevel.swift */,
 			);
 			path = Audio;
@@ -380,6 +402,7 @@
 			children = (
 				6007117A197E4FE46194C7A2 /* AudioWriterPipeline.swift */,
 				0428543066EEF96D223A7633 /* FileWriterService.swift */,
+				947EC3DB590771608A94A3EE /* RecordingAudioData.swift */,
 				5520D029B75CADD26FE8195D /* RecordingFinalizer.swift */,
 			);
 			path = Output;
@@ -480,12 +503,14 @@
 				BC003E418C2D69081B49A9E4 /* MeteringService.swift in Sources */,
 				58FB1A39714F1D07C842C9F9 /* MicCaptureService.swift in Sources */,
 				925A5A1C3176D1313B9D7ABC /* MicSampleBuffer.swift in Sources */,
+				D231D4DCAD86E40E69069419 /* PCMBufferSampleExtractor.swift in Sources */,
 				60CCBEE9269195CA9394214C /* PermissionManager.swift in Sources */,
 				F6D67DE569A3AF659AFEE6EE /* PermissionType.swift in Sources */,
 				2A7DA41003947B45103068D7 /* PermissionWizardViewModel.swift in Sources */,
 				623366D2CBF5853DBF5196F7 /* Profile.swift in Sources */,
 				A8226BB4123871A676923939 /* RecorderCoordinator.swift in Sources */,
 				67E672F3B3B4660592B66C33 /* RecorderState.swift in Sources */,
+				A796DA1411210DB966D42347 /* RecordingAudioData.swift in Sources */,
 				879FDFC00A09AC447AFF9EDD /* RecordingFinalizer.swift in Sources */,
 				D1E0F7FBBB944A65DA7A5C34 /* RecordingManifest.swift in Sources */,
 				78A0925C14F1A317D2F88EAB /* RecordingPopoverView.swift in Sources */,
@@ -507,6 +532,7 @@
 				263B2E99D9CD78EFAB5C209F /* AudioFirstRecorderOrchestrationTests.swift in Sources */,
 				3BFE4DD095AC5B3310FF81AD /* AudioGainPipelineTests.swift in Sources */,
 				1FA380E61473295A18AE63C3 /* AudioMixerServiceTests.swift in Sources */,
+				7FD1747B8F2D6E5F6105C359 /* AudioRecordingHarnessTests.swift in Sources */,
 				71AB5C3AB5BCFFBEDB39D3CA /* AudioWriterPipelineTests.swift in Sources */,
 				DA41D8DF6D0BD39E67C40296 /* CaptureServiceContractTests.swift in Sources */,
 				5DFEAAFBF1582443ABA9B987 /* FinalizeRecordingViewModelTests.swift in Sources */,
@@ -514,11 +540,13 @@
 				017B51A28DA27478A57196D1 /* MeteringServiceTests.swift in Sources */,
 				B74CD5D58F83890B9A15C265 /* MicCaptureServiceTests.swift in Sources */,
 				E8EFCF5633E45CD06DA9A423 /* MicCaptureTapTests.swift in Sources */,
+				2FED3088D1B76A04EE6A7B47 /* PCMBufferSampleExtractorTests.swift in Sources */,
 				3B33518F3BC35ABCDB49C997 /* PermissionManagerAudioTests.swift in Sources */,
 				3E29486FC472483800ABC9D2 /* PermissionWizardViewModelTests.swift in Sources */,
 				0E7B7E8C716CC853D62ED325 /* RecorderCoordinatorTests.swift in Sources */,
 				38066617EC4CD689F9A98C48 /* RecordingFinalizerTests.swift in Sources */,
 				FC256368AE11AF079F074F07 /* RecordingFlowIntegrationTests.swift in Sources */,
+				911EC288C33CD058DF156446 /* RecordingRuntimeFlowTests.swift in Sources */,
 				8BE1669AAC3650C5E7F25033 /* RecordingViewModelTests.swift in Sources */,
 				E1E3705F5D131A84085F2083 /* RecoveryServiceTests.swift in Sources */,
 				315BE5131A565C25718C4A3B /* SystemAudioCaptureTests.swift in Sources */,
@@ -544,6 +572,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_LSUIElement = YES;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Echo Recorder needs microphone access to capture your voice during recordings.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -624,6 +653,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_LSUIElement = YES;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Echo Recorder needs microphone access to capture your voice during recordings.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",

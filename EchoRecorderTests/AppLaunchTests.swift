@@ -12,6 +12,13 @@ private final class FakeStatusItemController: StatusItemControlling {
 
 @MainActor
 final class AppLaunchTests: XCTestCase {
+    func testAppBundleContainsMicrophoneUsageDescription() {
+        let usageDescription = Bundle.main.object(forInfoDictionaryKey: "NSMicrophoneUsageDescription") as? String
+
+        XCTAssertNotNil(usageDescription)
+        XCTAssertFalse((usageDescription ?? "").trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+    }
+
     func testAppDelegateCreatesStatusItemController() {
         let fakeController = FakeStatusItemController(configuredTitle: "Injected")
         var factoryCallCount = 0

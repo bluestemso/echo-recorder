@@ -83,7 +83,8 @@ private struct AudioIntegrationHarness {
             coordinator: RecorderCoordinator(
                 capture: FakeCaptureService(),
                 mic: FakeMicService(),
-                finalizer: FakeRecordingFinalizer()
+                finalizer: FakeRecordingFinalizer(),
+                permissionManager: AlwaysAuthorizedPermissionManager()
             )
         )
     }
@@ -104,6 +105,7 @@ private extension Profile {
 @MainActor
 private final class FakeCaptureService: CaptureServicing {
     private(set) var isRunning = false
+    var onSystemAudioSamples: ((SystemAudioSampleBuffer) -> Void)?
 
     func startCapture(source: CaptureSourceDescriptor) async throws {
         isRunning = true
@@ -128,7 +130,11 @@ private final class FakeMicService: MicCaptureServicing {
 }
 
 private struct FakeRecordingFinalizer: RecordingFinalizing {
-    func finalize(fileName: String, overrideDirectory: URL?) throws -> FinalizedAudioOutput {
+    func finalize(
+        fileName: String,
+        overrideDirectory: URL?,
+        recordingData: RecordingAudioData
+    ) throws -> FinalizedAudioOutput {
         let baseDirectory = overrideDirectory ?? URL(fileURLWithPath: "/tmp/echo-recorder-tests/integration", isDirectory: true)
         let folder = baseDirectory.appendingPathComponent(fileName, isDirectory: true)
         return FinalizedAudioOutput(
@@ -137,5 +143,15 @@ private struct FakeRecordingFinalizer: RecordingFinalizing {
             system: folder.appendingPathComponent("system_audio.m4a", isDirectory: false),
             mic: folder.appendingPathComponent("mic_audio.m4a", isDirectory: false)
         )
+    }
+}
+
+private struct AlwaysAuthorizedPermissionManager: PermissionManaging {
+    func status(for permission: PermissionType) -> PermissionStatus {
+        .authorized
+    }
+
+    func request(_ permission: PermissionType) async -> PermissionStatus {
+        .authorized
     }
 }

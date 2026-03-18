@@ -6,6 +6,12 @@
 - [ ] Regenerate the Xcode project: `xcodegen generate`.
 - [ ] Run targeted integration coverage:
   - `xcodebuild test -project EchoRecorder.xcodeproj -scheme EchoRecorder -destination 'platform=macOS' -only-testing:EchoRecorderTests/RecordingFlowIntegrationTests`
+- [ ] Run synthetic smoke harness:
+  - `xcodebuild test -project EchoRecorder.xcodeproj -scheme EchoRecorder -destination 'platform=macOS' -only-testing:EchoRecorderTests/AudioRecordingHarnessTests/testSyntheticHarnessProducesReadableM4AArtifacts`
+- [ ] Run live smoke harness:
+  - `touch /tmp/echo-run-live-harness`
+  - `xcodebuild test -project EchoRecorder.xcodeproj -scheme EchoRecorder -destination 'platform=macOS' -only-testing:EchoRecorderTests/AudioRecordingHarnessTests/testLiveHarnessProducesNonZeroDurationWhenEnabled`
+  - `rm /tmp/echo-run-live-harness`
 - [ ] Run full test suite:
   - `xcodebuild test -project EchoRecorder.xcodeproj -scheme EchoRecorder -destination 'platform=macOS'`
 
@@ -15,6 +21,7 @@
 - [ ] Verify one clean idle -> recording -> finalize -> idle pass manually.
 - [ ] Confirm no unexpected permission prompts appear after initial grant.
 - [ ] Confirm finalized output includes `mixed.m4a`, `system_audio.m4a`, and `mic_audio.m4a`.
+- [ ] Confirm each generated artifact has non-zero playback duration.
 - [ ] Confirm MVP scope remains audio-only (no required video artifact).
 
 ## Release artifacts
