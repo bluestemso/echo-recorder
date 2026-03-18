@@ -118,4 +118,18 @@ final class RecordingViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.levelRows[0].level.peak, 0.5, accuracy: 0.001)
         XCTAssertEqual(viewModel.levelRows[1].level.peak, 0.8, accuracy: 0.001)
     }
+
+    func testGainValuesInitializedToUnity() {
+        let viewModel = RecordingViewModel()
+        XCTAssertEqual(viewModel.gainValues[.system], 1.0)
+        XCTAssertEqual(viewModel.gainValues[.microphone], 1.0)
+    }
+
+    func testSetGainUpdatesGainValuesPublished() {
+        let viewModel = RecordingViewModel()
+        viewModel.setGain(0.75, for: .system)
+        viewModel.setGain(1.5, for: .microphone)
+        XCTAssertEqual(viewModel.gainValues[.system], 0.75)
+        XCTAssertEqual(viewModel.gainValues[.microphone], 1.5)
+    }
 }

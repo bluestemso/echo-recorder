@@ -11,6 +11,18 @@ struct RecordingPopoverView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                     LevelMeterView(level: row.level)
+                    HStack(spacing: 6) {
+                        Text("Gain")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                        Slider(
+                            value: Binding(
+                                get: { viewModel.gainValues[row.source] ?? 1.0 },
+                                set: { viewModel.setGain($0, for: row.source) }
+                            ),
+                            in: 0.0...2.0
+                        )
+                    }
                 }
             }
 

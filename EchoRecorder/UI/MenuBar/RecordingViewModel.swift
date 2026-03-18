@@ -29,6 +29,10 @@ final class RecordingViewModel: ObservableObject {
     @Published private(set) var isRecording = false
     @Published private(set) var lastFinalizedOutput: FinalizedAudioOutput?
     @Published private(set) var latestErrorDescription: String?
+    @Published private(set) var gainValues: [InputSource: Float] = [
+        .system: 1.0,
+        .microphone: 1.0
+    ]
 
     var primaryActionTitle: String {
         isRecording ? "Stop Recording" : "Start Recording"
@@ -109,6 +113,7 @@ final class RecordingViewModel: ObservableObject {
         case .microphone:
             sourceGain.microphone = value
         }
+        gainValues[source] = value
     }
 
     func applyMeterSnapshot(system: SourceLevel, mic: SourceLevel) {
