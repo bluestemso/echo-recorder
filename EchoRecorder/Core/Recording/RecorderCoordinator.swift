@@ -1,3 +1,4 @@
+import AVFoundation
 import Combine
 import Foundation
 
@@ -21,13 +22,19 @@ final class RecorderCoordinator: ObservableObject {
     private var latestSystemMeterLevel: SourceLevel = .zero
     private var latestMicMeterLevel: SourceLevel = .zero
     private let meteringService = MeteringService()
+    private var systemGain: Float = 1.0
+    private var micGain: Float = 1.0
+    private let audioMixer: any AudioMixing
+    private let inputDeviceService: AudioInputDeviceService?
 
     init(
         initialState: RecorderState = .idle,
         capture: (any CaptureServicing)? = nil,
         mic: (any MicCaptureServicing)? = nil,
         finalizer: (any RecordingFinalizing)? = nil,
-        permissionManager: (any PermissionManaging)? = nil
+        permissionManager: (any PermissionManaging)? = nil,
+        audioMixer: (any AudioMixing)? = nil,
+        inputDeviceService: AudioInputDeviceService? = nil
     ) {
         state = initialState
         self.capture = capture ?? CaptureService()
@@ -37,6 +44,16 @@ final class RecorderCoordinator: ObservableObject {
             defaultDirectory: FileManager.default.temporaryDirectory
         )
         self.permissionManager = permissionManager ?? PermissionManager()
+        self.audioMixer = audioMixer ?? AudioMixerService()
+        self.inputDeviceService = inputDeviceService
+    }
+
+    func setGain(_ gain: Float, forSystem: Bool) {
+        if forSystem {
+            systemGain = gain
+        } else {
+            micGain = gain
+        }
     }
 
     func startRecording() {
@@ -51,6 +68,10 @@ final class RecorderCoordinator: ObservableObject {
         transition(to: .idle)
     }
 
+    func selectDevice(_ device: AudioInputDevice) {
+        mic.selectDevice(device)
+    }
+
     func startAudioRecording(profile: Profile) async throws {
         transition(to: .preparing)
 
@@ -58,10 +79,25 @@ final class RecorderCoordinator: ObservableObject {
             try await requestPermissions(for: profile)
             recordingBufferStore.reset()
 
+            // Select input device before starting capture
+            if let service = inputDeviceService {
+                let device = service.selectedDevice
+                mic.selectDevice(device)
+#if DEBUG
+                print("[CaptureDebug] Selected input device: \(device.name) (uid=\(device.uid))")
+#endif
+            }
+
             capture.onSystemAudioSamples = { [weak self] sampleBuffer in
                 guard let self else { return }
-                self.recordingBufferStore.appendSystem(sampleBuffer)
-                let level = self.meteringService.computeLevel(samples: sampleBuffer.samples)
+                let gainedSamples = self.audioMixer.applyGain(to: sampleBuffer.samples, gain: self.systemGain)
+                let gainedBuffer = SystemAudioSampleBuffer(
+                    samples: gainedSamples,
+                    sampleRate: sampleBuffer.sampleRate,
+                    channelCount: sampleBuffer.channelCount
+                )
+                self.recordingBufferStore.appendSystem(gainedBuffer)
+                let level = self.meteringService.computeLevel(samples: gainedSamples)
                 DispatchQueue.main.async {
                     self.latestSystemMeterLevel = level
                     self.emitMeterSnapshot()
@@ -69,8 +105,14 @@ final class RecorderCoordinator: ObservableObject {
             }
             mic.onMicSamples = { [weak self] sampleBuffer in
                 guard let self else { return }
-                self.recordingBufferStore.appendMic(sampleBuffer)
-                let level = self.meteringService.computeLevel(samples: sampleBuffer.samples)
+                let gainedSamples = self.audioMixer.applyGain(to: sampleBuffer.samples, gain: self.micGain)
+                let gainedBuffer = MicSampleBuffer(
+                    samples: gainedSamples,
+                    sampleRate: sampleBuffer.sampleRate,
+                    channelCount: sampleBuffer.channelCount
+                )
+                self.recordingBufferStore.appendMic(gainedBuffer)
+                let level = self.meteringService.computeLevel(samples: gainedSamples)
                 DispatchQueue.main.async {
                     self.latestMicMeterLevel = level
                     self.emitMeterSnapshot()
@@ -143,6 +185,38 @@ final class RecorderCoordinator: ObservableObject {
         }
     }
 
+    func stopCapture() async throws {
+        transition(to: .pendingFinalize)
+        if mic.isCapturing {
+            try mic.stopCapture()
+        }
+        if capture.isRunning {
+            try await capture.stopCapture()
+        }
+        capture.onSystemAudioSamples = nil
+        mic.onMicSamples = nil
+        latestSystemMeterLevel = .zero
+        latestMicMeterLevel = .zero
+        onMeterSnapshot?(.zero, .zero)
+    }
+
+    func finalizeRecording(recordingName: String, overrideDirectory: URL) async throws -> FinalizedAudioOutput {
+        transition(to: .finalizing)
+        do {
+            let recordingData = recordingBufferStore.snapshot()
+            let output = try finalizer.finalize(
+                fileName: recordingName,
+                overrideDirectory: overrideDirectory,
+                recordingData: recordingData
+            )
+            transition(to: .idle)
+            return output
+        } catch {
+            transition(to: .idle)
+            throw error
+        }
+    }
+
     private func requestPermissions(for profile: Profile) async throws {
         let micStatus = permissionManager.status(for: .microphone)
         if micStatus != .authorized {
@@ -188,6 +262,12 @@ final class RecorderCoordinator: ObservableObject {
         case (.finalizing, .idle):
             return true
         case (.recording, .idle):
+            return true
+        case (.recording, .pendingFinalize):
+            return true
+        case (.pendingFinalize, .finalizing):
+            return true
+        case (.pendingFinalize, .idle):
             return true
         default:
             return false

@@ -1,3 +1,4 @@
+import AVFoundation
 import Combine
 import Foundation
 
@@ -34,15 +35,12 @@ final class RecordingViewModel: ObservableObject {
         .microphone: 1.0
     ]
     @Published private(set) var pendingFinalize: FinalizeRecordingViewModel?
-    
-    // MARK: - Input Device Selection (stubs - replaced after 04-01)
-    // TODO: After 04-01 executes, remove stubs and use real InputDeviceService
-    @Published var selectedDevice: AudioInputDevice = AudioInputDevice(uid: "default", name: "Default Input", deviceType: .builtIn)
-    @Published var availableInputDevices: [AudioInputDevice] = []
-    
-    func setSelectedDevice(_ device: AudioInputDevice) {
-        selectedDevice = device
-    }
+
+    // MARK: - Input Device Selection
+    @Published private(set) var selectedDevice: AudioInputDevice
+    @Published private(set) var availableInputDevices: [AudioInputDevice] = []
+
+    private let inputDeviceService: AudioInputDeviceService
 
     var primaryActionTitle: String {
         isRecording ? "Stop Recording" : "Start Recording"
@@ -75,7 +73,13 @@ final class RecordingViewModel: ObservableObject {
             return "Echo-\(formatter.string(from: Date()))"
         },
         onStartRecording: @escaping () -> Void = {},
-        onStopRecording: @escaping () -> Void = {}
+        onStopRecording: @escaping () -> Void = {},
+        inputDeviceServiceProvider: @escaping () -> AudioInputDeviceService = {
+            let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
+                ?? FileManager.default.temporaryDirectory
+            let store = JSONStore(baseDirectory: appSupport.appendingPathComponent("EchoRecorder", isDirectory: true))
+            return AudioInputDeviceService(store: store)
+        }
     ) {
         self.recorderCoordinator = recorderCoordinator
         self.audioMixer = audioMixer
@@ -84,6 +88,9 @@ final class RecordingViewModel: ObservableObject {
         self.recordingNameProvider = recordingNameProvider
         self.onStartRecording = onStartRecording
         self.onStopRecording = onStopRecording
+        self.inputDeviceService = inputDeviceServiceProvider()
+        self.selectedDevice = inputDeviceService.selectedDevice
+        self.availableInputDevices = inputDeviceService.availableDevices
 
         recorderCoordinator?.$state
             .sink { [weak self] state in
@@ -99,6 +106,12 @@ final class RecordingViewModel: ObservableObject {
         if let recorderState = recorderCoordinator?.state {
             bindRecorderState(recorderState)
         }
+    }
+
+    func setSelectedDevice(_ device: AudioInputDevice) {
+        inputDeviceService.selectDevice(device)
+        selectedDevice = device
+        availableInputDevices = inputDeviceService.availableDevices
     }
 
     func updateLevels(_ levels: [InputSource: SourceLevel]) {
