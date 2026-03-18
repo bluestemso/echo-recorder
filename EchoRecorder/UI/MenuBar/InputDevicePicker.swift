@@ -1,26 +1,5 @@
 import SwiftUI
 
-// MARK: - Stub Types (replace with imports from InputDeviceService.swift after 04-01 executes)
-
-enum DeviceType: String, Codable {
-    case builtIn
-    case usb
-    case bluetooth
-    case other
-}
-
-struct AudioInputDevice: Identifiable, Equatable, Codable, Hashable {
-    let uid: String
-    let name: String
-    let deviceType: DeviceType
-
-    var id: String { uid }
-    
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(uid)
-    }
-}
-
 // MARK: - Device Type Badge
 
 struct DeviceTypeBadge: View {
@@ -60,20 +39,25 @@ struct InputDevicePicker: View {
     let isEnabled: Bool
 
     var body: some View {
-        Picker("Input Device", selection: $selectedDevice) {
+        Picker("Input Device", selection: Binding(
+            get: { selectedDevice.id },
+            set: { newId in
+                if let device = availableDevices.first(where: { $0.id == newId }) {
+                    selectedDevice = device
+                    onDeviceSelected(device)
+                }
+            }
+        )) {
             ForEach(availableDevices) { device in
                 HStack {
                     Text(device.name)
                     DeviceTypeBadge(deviceType: device.deviceType)
                 }
-                .tag(device)
+                .tag(device.id)
             }
         }
         .pickerStyle(.menu)
         .disabled(!isEnabled)
-        .onChange(of: selectedDevice) { _, newValue in
-            onDeviceSelected(newValue)
-        }
     }
 }
 

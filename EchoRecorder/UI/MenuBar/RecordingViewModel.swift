@@ -33,6 +33,16 @@ final class RecordingViewModel: ObservableObject {
         .system: 1.0,
         .microphone: 1.0
     ]
+    @Published private(set) var pendingFinalize: FinalizeRecordingViewModel?
+    
+    // MARK: - Input Device Selection (stubs - replaced after 04-01)
+    // TODO: After 04-01 executes, remove stubs and use real InputDeviceService
+    @Published var selectedDevice: AudioInputDevice = AudioInputDevice(uid: "default", name: "Default Input", deviceType: .builtIn)
+    @Published var availableInputDevices: [AudioInputDevice] = []
+    
+    func setSelectedDevice(_ device: AudioInputDevice) {
+        selectedDevice = device
+    }
 
     var primaryActionTitle: String {
         isRecording ? "Stop Recording" : "Start Recording"
@@ -47,7 +57,7 @@ final class RecordingViewModel: ObservableObject {
     private weak var recorderCoordinator: RecorderCoordinator?
     private var cancellables: Set<AnyCancellable> = []
     private var sourceGain = SourceGain.unity
-    private var activeRecordingName: String?
+    private(set) var activeRecordingName: String?
 
     init(
         recorderCoordinator: RecorderCoordinator? = nil,
@@ -103,6 +113,7 @@ final class RecordingViewModel: ObservableObject {
             levelRows = RecordingViewModel.InputSource.allCases.map { source in
                 LevelRow(source: source, title: source.title, level: .zero)
             }
+            pendingFinalize = nil
         }
     }
 
@@ -114,6 +125,7 @@ final class RecordingViewModel: ObservableObject {
             sourceGain.microphone = value
         }
         gainValues[source] = value
+        recorderCoordinator?.setGain(value, forSystem: source == .system)
     }
 
     func applyMeterSnapshot(system: SourceLevel, mic: SourceLevel) {
@@ -144,6 +156,39 @@ final class RecordingViewModel: ObservableObject {
         }
     }
 
+    func confirmFinalize() {
+        guard let coordinator = recorderCoordinator,
+              let recordingName = activeRecordingName
+        else { return }
+
+        Task { [weak self] in
+            guard let self, let finalizeVM = self.pendingFinalize else { return }
+            do {
+                let output = try await coordinator.finalizeRecording(
+                    recordingName: recordingName,
+                    overrideDirectory: finalizeVM.selectedDirectory
+                )
+                self.lastFinalizedOutput = output
+                self.pendingFinalize = nil
+                self.activeRecordingName = nil
+#if DEBUG
+                print("[CaptureDebug] confirmFinalize mixed=\(output.mixed.path)")
+#endif
+            } catch {
+                self.latestErrorDescription = error.localizedDescription
+                self.pendingFinalize = nil
+                self.activeRecordingName = nil
+            }
+        }
+    }
+
+    private static func makeSaveLocationService() -> SaveLocationService {
+        let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
+            ?? FileManager.default.temporaryDirectory
+        let store = JSONStore(baseDirectory: appSupport.appendingPathComponent("EchoRecorder", isDirectory: true))
+        return SaveLocationService(store: store)
+    }
+
     private func startRecording(using coordinator: RecorderCoordinator) async {
         let profile = profileProvider()
         let recordingName = recordingNameProvider()
@@ -165,20 +210,24 @@ final class RecordingViewModel: ObservableObject {
 
     private func stopRecording(using coordinator: RecorderCoordinator) async {
         let recordingName = activeRecordingName ?? recordingNameProvider()
+        activeRecordingName = recordingName
 
         do {
-            lastFinalizedOutput = try await coordinator.stopAndFinalize(
-                recordingName: recordingName,
-                overrideDirectory: outputDirectoryProvider()
+            try await coordinator.stopCapture()
+            let finalizer = RecordingFinalizer(
+                fileWriter: FileWriterService(),
+                defaultDirectory: SaveLocationService.defaultFallback
             )
-            activeRecordingName = nil
+            pendingFinalize = FinalizeRecordingViewModel(
+                finalizer: finalizer,
+                saveLocationService: RecordingViewModel.makeSaveLocationService()
+            )
 #if DEBUG
-            if let output = lastFinalizedOutput {
-                print("[CaptureDebug] stopRecording finalized mixed=\(output.mixed.path) system=\(output.system.path) mic=\(output.mic.path)")
-            }
+            print("[CaptureDebug] stopCapture complete, awaiting finalize for name=\(recordingName)")
 #endif
         } catch {
             latestErrorDescription = error.localizedDescription
+            activeRecordingName = nil
 #if DEBUG
             print("[CaptureDebug] stopRecording failed error=\(error)")
 #endif
