@@ -31,9 +31,18 @@ User can start a recording in two clicks, monitor and adjust levels live, and re
 
 ### Active
 
-<!-- Next milestone scope to be defined with /gsd-new-milestone -->
+<!-- v2.0: UX improvements and input source selection -->
 
-(TBD — start next milestone with `/gsd-new-milestone`)
+**Current Milestone: v2.0**
+
+**Goal:** Improve visual feedback, UX polish, and add input source selection
+
+**Target features:**
+- Menu bar iconography using SF Symbols (idle, recording, finalizing states)
+- Clear recording state indicator (red background when recording)
+- Improved popover design (especially post-recording view)
+- Faster popover animations
+- Input source selection with fallback to built-in microphone
 
 ### Out of Scope
 

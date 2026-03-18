@@ -1,33 +1,33 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-status: unknown
-last_updated: "2026-03-18T19:04:45.632Z"
+milestone: v2.0
+milestone_name: UX Polish & Input Selection
+status: defining_requirements
+last_updated: "2026-03-18T19:30:00.000Z"
 progress:
-  total_phases: 3
-  completed_phases: 3
-  total_plans: 3
-  completed_plans: 3
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # STATE.md
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-03-18 after initialization)
+See: `.planning/PROJECT.md` (updated 2026-03-18)
 
 **Core value:** User can start a recording in two clicks, monitor and adjust levels live, and reliably get named, organized output files when they stop.
-**Current milestone:** Milestone 3 — Live Metering, Gain Control, Save Location
+**Current milestone:** v2.0 — UX Polish & Input Selection
 
 ---
 
-## Current Focus
+## Current Position
 
-**Phase 1: Live Level Monitoring**
-
-- Status: Not started
-- Next action: `/gsd-discuss-phase 1` or `/gsd-plan-phase 1`
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-03-18 — Milestone v2.0 started
 
 ---
 
@@ -48,9 +48,9 @@ See: `.planning/PROJECT.md` (updated 2026-03-18 after initialization)
 
 | Phase | Name | Status |
 |-------|------|--------|
-| 1 | Live Level Monitoring | ⏳ Not started |
-| 2 | Per-Source Gain Control | ⏳ Not started |
-| 3 | Save Location Picker | ⏳ Not started |
+| 4 | TBD (Input Source Selection) | ⏳ Not started |
+| 5 | TBD (Menu Bar Iconography) | ⏳ Not started |
+| 6 | TBD (UX Polish) | ⏳ Not started |
 
 ---
-*Initialized: 2026-03-18*
+*Milestone v2.0 started: 2026-03-18*
