@@ -80,15 +80,13 @@ struct RecordingPopoverView: View {
                         .font(.caption)
                 }
             }
-            .buttonStyle(.borderless)
+            .buttonStyle(.plain)
 
             if isShowingInputSettings {
                 VStack(alignment: .leading, spacing: 8) {
-                    HStack {
-                        Text(viewModel.selectedDevice.name)
-                            .font(.caption)
-                        DeviceTypeBadge(deviceType: viewModel.selectedDevice.deviceType)
-                    }
+                    Text("Input Device")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
 
                     InputDevicePicker(
                         selectedDevice: Binding(
