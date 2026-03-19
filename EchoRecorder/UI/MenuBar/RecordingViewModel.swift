@@ -4,6 +4,12 @@ import Foundation
 
 @MainActor
 final class RecordingViewModel: ObservableObject {
+    enum FinalizeUIState {
+        case editing
+        case saving
+        case success
+    }
+
     enum InputSource: CaseIterable, Hashable {
         case system
         case microphone
@@ -35,6 +41,8 @@ final class RecordingViewModel: ObservableObject {
         .microphone: 1.0
     ]
     @Published private(set) var pendingFinalize: FinalizeRecordingViewModel?
+    @Published private(set) var finalizeUIState: FinalizeUIState = .editing
+    @Published var pendingFinalizeName = ""
 
     // MARK: - Input Device Selection
     @Published private(set) var selectedDevice: AudioInputDevice
@@ -126,7 +134,11 @@ final class RecordingViewModel: ObservableObject {
             levelRows = RecordingViewModel.InputSource.allCases.map { source in
                 LevelRow(source: source, title: source.title, level: .zero)
             }
-            pendingFinalize = nil
+            if pendingFinalize == nil {
+                activeRecordingName = nil
+                pendingFinalizeName = ""
+                finalizeUIState = .editing
+            }
         }
     }
 
@@ -171,26 +183,36 @@ final class RecordingViewModel: ObservableObject {
 
     func confirmFinalize() {
         guard let coordinator = recorderCoordinator,
-              let recordingName = activeRecordingName
+              let originalRecordingName = activeRecordingName,
+              let finalizeVM = pendingFinalize,
+              finalizeUIState == .editing
         else { return }
 
+        let trimmedPendingName = pendingFinalizeName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let resolvedRecordingName = trimmedPendingName.isEmpty ? originalRecordingName : trimmedPendingName
+        finalizeUIState = .saving
+
         Task { [weak self] in
-            guard let self, let finalizeVM = self.pendingFinalize else { return }
+            guard let self else { return }
             do {
                 let output = try await coordinator.finalizeRecording(
-                    recordingName: recordingName,
+                    recordingName: resolvedRecordingName,
                     overrideDirectory: finalizeVM.selectedDirectory
                 )
                 self.lastFinalizedOutput = output
+                self.finalizeUIState = .success
+                let resetDelay = UInt64(PopoverUXTiming.postSaveResetDelay * 1_000_000_000)
+                try? await Task.sleep(nanoseconds: resetDelay)
                 self.pendingFinalize = nil
                 self.activeRecordingName = nil
+                self.pendingFinalizeName = ""
+                self.finalizeUIState = .editing
 #if DEBUG
                 print("[CaptureDebug] confirmFinalize mixed=\(output.mixed.path)")
 #endif
             } catch {
                 self.latestErrorDescription = error.localizedDescription
-                self.pendingFinalize = nil
-                self.activeRecordingName = nil
+                self.finalizeUIState = .editing
             }
         }
     }
@@ -235,6 +257,8 @@ final class RecordingViewModel: ObservableObject {
                 finalizer: finalizer,
                 saveLocationService: RecordingViewModel.makeSaveLocationService()
             )
+            pendingFinalizeName = recordingName
+            finalizeUIState = .editing
 #if DEBUG
             print("[CaptureDebug] stopCapture complete, awaiting finalize for name=\(recordingName)")
 #endif

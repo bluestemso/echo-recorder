@@ -58,10 +58,38 @@ final class RecordingRuntimeFlowTests: XCTestCase {
         XCTAssertEqual(viewModel.lastFinalizedOutput?.mixed.lastPathComponent, "mixed.m4a")
     }
 
-    func testFinalizeSuccessResetDelayTargetsRoughlyOnePointFiveSeconds() {
-        let expectedDelay: TimeInterval = 1.5
-        XCTAssertEqual(expectedDelay, 1.5, accuracy: 0.2)
-        XCTFail("TODO: observe success state before reset and assert reset delay is ~1.5 seconds")
+    func testFinalizeSuccessStateIsVisibleBeforeResetAndResetsRoughlyAfterOnePointFiveSeconds() async {
+        let coordinator = RecorderCoordinator(
+            capture: FakeCaptureService(),
+            mic: FakeMicService(),
+            finalizer: FakeRecordingFinalizer(),
+            permissionManager: AlwaysAuthorizedPermissionManager()
+        )
+        let viewModel = RecordingViewModel(recorderCoordinator: coordinator)
+
+        viewModel.toggleRecording()
+        try? await Task.sleep(nanoseconds: 100_000_000)
+        viewModel.toggleRecording()
+        try? await Task.sleep(nanoseconds: 100_000_000)
+
+        let finalizeStart = Date()
+        viewModel.confirmFinalize()
+        try? await Task.sleep(nanoseconds: 100_000_000)
+
+        XCTAssertEqual(viewModel.finalizeUIState, .success)
+        XCTAssertNotNil(viewModel.pendingFinalize)
+
+        while viewModel.pendingFinalize != nil {
+            try? await Task.sleep(nanoseconds: 50_000_000)
+            if Date().timeIntervalSince(finalizeStart) > 2.0 {
+                break
+            }
+        }
+
+        let elapsed = Date().timeIntervalSince(finalizeStart)
+        XCTAssertNil(viewModel.pendingFinalize)
+        XCTAssertEqual(viewModel.finalizeUIState, .editing)
+        XCTAssertEqual(elapsed, 1.5, accuracy: 0.2)
     }
 }
 

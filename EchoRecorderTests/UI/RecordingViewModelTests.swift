@@ -133,9 +133,85 @@ final class RecordingViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.gainValues[.microphone], 1.5)
     }
 
-    func testConfirmFinalizeUsesEditedPendingFinalizeNameForFinalizeCall() {
+    func testConfirmFinalizeUsesEditedPendingFinalizeNameForFinalizeCall() async {
+        let finalizer = RecordingNameCapturingFinalizer()
+        let coordinator = RecorderCoordinator(
+            capture: ViewModelTestCaptureService(),
+            mic: ViewModelTestMicService(),
+            finalizer: finalizer,
+            permissionManager: ViewModelTestAlwaysAuthorizedPermissionManager()
+        )
+        let viewModel = RecordingViewModel(recorderCoordinator: coordinator)
+
+        viewModel.toggleRecording()
+        try? await Task.sleep(nanoseconds: 100_000_000)
+        viewModel.toggleRecording()
+        try? await Task.sleep(nanoseconds: 100_000_000)
+
         let editedName = "Weekly Standup - Edited"
-        XCTAssertEqual(editedName, "Weekly Standup - Edited")
-        XCTFail("TODO: verify edited pending finalize name is passed to finalizeRecording(recordingName:)")
+        viewModel.pendingFinalizeName = editedName
+
+        viewModel.confirmFinalize()
+        try? await Task.sleep(nanoseconds: 100_000_000)
+
+        XCTAssertEqual(finalizer.lastFileName, editedName)
+    }
+}
+
+@MainActor
+private final class ViewModelTestCaptureService: CaptureServicing {
+    private(set) var isRunning = false
+    var onSystemAudioSamples: ((SystemAudioSampleBuffer) -> Void)?
+
+    func startCapture(source: CaptureSourceDescriptor) async throws {
+        isRunning = true
+    }
+
+    func stopCapture() async throws {
+        isRunning = false
+    }
+}
+
+private final class ViewModelTestMicService: MicCaptureServicing {
+    private(set) var isCapturing = false
+    var onMicSamples: ((MicSampleBuffer) -> Void)?
+
+    func startCapture() throws {
+        isCapturing = true
+    }
+
+    func stopCapture() throws {
+        isCapturing = false
+    }
+
+    func selectDevice(_ device: AudioInputDevice) {}
+}
+
+private final class RecordingNameCapturingFinalizer: RecordingFinalizing {
+    private(set) var lastFileName: String?
+
+    func finalize(
+        fileName: String,
+        overrideDirectory: URL?,
+        recordingData: RecordingAudioData
+    ) throws -> FinalizedAudioOutput {
+        lastFileName = fileName
+        let folder = URL(fileURLWithPath: "/tmp/echo-recorder-tests/view-model", isDirectory: true)
+        return FinalizedAudioOutput(
+            folder: folder,
+            mixed: folder.appendingPathComponent("mixed.m4a"),
+            system: folder.appendingPathComponent("system_audio.m4a"),
+            mic: folder.appendingPathComponent("mic_audio.m4a")
+        )
+    }
+}
+
+private struct ViewModelTestAlwaysAuthorizedPermissionManager: PermissionManaging {
+    func status(for permission: PermissionType) -> PermissionStatus {
+        .authorized
+    }
+
+    func request(_ permission: PermissionType) async -> PermissionStatus {
+        .authorized
     }
 }

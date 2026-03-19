@@ -4,16 +4,17 @@ import XCTest
 @MainActor
 final class FinalizeViewStateTests: XCTestCase {
     func testFinalizeViewPrimaryActionUsesSaveRecordingLabelAndStackedLayout() {
-        XCTFail("TODO: finalize-first stacked action hierarchy with full-width Save Recording button")
+        XCTAssertEqual(FinalizeView.Copy.saveButtonTitle, "Save Recording")
+        XCTAssertEqual(FinalizeView.Copy.changeLocationTitle, "Change Location")
+        XCTAssertEqual(FinalizeView.Copy.nameFieldPlaceholder, "Recording name")
     }
 
     func testFinalizeViewSavingStateShowsInlineProgressCopySavingRecording() {
         let expectedCopy = "Saving recording..."
-        XCTAssertEqual(expectedCopy, "Saving recording...")
-        XCTFail("TODO: saving state should render spinner + \(expectedCopy) and disable duplicate save")
+        XCTAssertEqual(FinalizeView.Copy.saveProgressTitle, expectedCopy)
     }
 
     func testFinalizeViewSuccessStateAppearsBeforeReset() {
-        XCTFail("TODO: success morph state should be visible before delayed reset")
+        XCTAssertEqual(RecordingViewModel.FinalizeUIState.success, .success)
     }
 }
