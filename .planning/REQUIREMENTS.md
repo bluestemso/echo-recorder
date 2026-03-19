@@ -10,12 +10,12 @@
 - [x] **ICON-01**: Menu bar icon shows SF Symbol `waveform` or `mic.fill` when idle
 - [x] **ICON-02**: Menu bar icon shows SF Symbol `record.circle.fill` (red) when recording
 - [x] **ICON-03**: Menu bar icon changes based on recorder state (idle → preparing → recording → finalizing → idle)
-- [ ] **ICON-04**: Icon update occurs within 100ms of state change
+- [x] **ICON-04**: Icon update occurs within 100ms of state change
 
 ### Recording Indicator (IND)
 
 - [x] **IND-01**: Menu bar status item shows red background/border when recording is active
-- [ ] **IND-02**: Red indicator is clearly visible against any desktop wallpaper
+- [x] **IND-02**: Red indicator is clearly visible against any desktop wallpaper
 - [x] **IND-03**: Indicator is removed when recording stops
 
 ### Popover Design (POPOV)
@@ -63,9 +63,9 @@
 | ICON-01 | Phase 4 | Complete |
 | ICON-02 | Phase 4 | Complete |
 | ICON-03 | Phase 4 | Complete |
-| ICON-04 | Phase 4 | Pending |
+| ICON-04 | Phase 4 | Complete |
 | IND-01 | Phase 5 | Complete |
-| IND-02 | Phase 5 | Pending |
+| IND-02 | Phase 5 | Complete |
 | IND-03 | Phase 5 | Complete |
 | POPOV-01 | Phase 6 | Pending |
 | POPOV-02 | Phase 6 | Pending |

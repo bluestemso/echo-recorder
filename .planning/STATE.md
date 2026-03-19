@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: completed
-last_updated: "2026-03-19T03:05:10.057Z"
+last_updated: "2026-03-19T14:13:42.888Z"
 progress:
   total_phases: 3
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 4
-  completed_plans: 3
+  completed_plans: 4
 ---
 
 # STATE.md
@@ -24,9 +24,9 @@ See: `.planning/PROJECT.md` (updated 2026-03-18)
 
 ## Current Position
 
-Phase: 05 (Menu Bar Iconography & Recording Indicator) — IN PROGRESS
-Plan: 1 of 2
-Status: 05-01 complete; ready for 05-02
+Phase: 06 (TBD UX Polish) — NOT STARTED
+Plan: 0 of 1
+Status: Phase 05 complete; deferred recording-contrast follow-up logged in phase artifacts
 
 ---
 
@@ -48,7 +48,7 @@ Status: 05-01 complete; ready for 05-02
 | Phase | Name | Status |
 |-------|------|--------|
 | 4 | Input Source Selection | ✅ Complete |
-| 5 | Menu Bar Iconography & Recording Indicator | 🔄 In progress (1/2 plans) |
+| 5 | Menu Bar Iconography & Recording Indicator | ✅ Complete (2/2 plans) |
 | 6 | TBD (UX Polish) | ⏳ Not started |
 
 ---
@@ -63,8 +63,9 @@ Status: 05-01 complete; ready for 05-02
 - UID resolution via kAudioHardwarePropertyDeviceForUID before setting default device
 - [Phase 05]: Kept recorder state visual mapping as a pure function to lock iconography semantics before AppKit wiring
 - [Phase 05]: Added exhaustive mapper tests asserting symbol name, medium weight, pill visibility, accessibility labels, and animation flags for all states
-
----
+- [Phase 05]: Kept status item updates directly bound to RecorderCoordinator state on RunLoop.main to satisfy <=100ms update latency
+- [Phase 05]: Used Core Animation opacity pulse with finite preparing/finalizing loops and continuous recording animation for smoother menu bar behavior
+- [Phase 05]: Accepted recording contrast issue as deferred backlog per user request while approving finalizing visibility fix
 
 ## Key Accomplishments
 
@@ -72,8 +73,10 @@ Status: 05-01 complete; ready for 05-02
 - 04-02: Added InputDevicePicker UI component with device type badges
 - Added inline settings section to RecordingPopoverView
 - 05-01: Added StatusItemVisualState mapper contract and exhaustive state-to-icon/pill/accessibility tests
+- 05-02: Wired state-driven status item rendering with recording pill, smoother animation, and latency/appearance/accessibility controller tests
 
 ---
 
 *Milestone v2.0 started: 2026-03-18*
 *Phase 04 completed: 2026-03-18*
+*Phase 05 completed: 2026-03-19*
