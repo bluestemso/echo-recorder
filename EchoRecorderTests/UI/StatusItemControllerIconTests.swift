@@ -111,4 +111,22 @@ final class StatusItemControllerIconTests: XCTestCase {
         XCTAssertEqual(controller.latestRenderEvent?.state, .idle)
         XCTAssertNotEqual(controller.latestRenderEvent?.animationMode, .continuous)
     }
+
+    func testFinalizingStateRemainsVisibleBeforeReturningToIdle() {
+        let recorderCoordinator = RecorderCoordinator(initialState: .finalizing)
+        let controller = StatusItemController(
+            title: "Echo",
+            recorderCoordinator: recorderCoordinator
+        )
+
+        RunLoop.main.run(until: Date().addingTimeInterval(0.02))
+        XCTAssertEqual(controller.latestRenderEvent?.state, .finalizing)
+
+        recorderCoordinator.stopRecording()
+        RunLoop.main.run(until: Date().addingTimeInterval(0.05))
+        XCTAssertEqual(controller.latestRenderEvent?.state, .finalizing)
+
+        RunLoop.main.run(until: Date().addingTimeInterval(0.45))
+        XCTAssertEqual(controller.latestRenderEvent?.state, .idle)
+    }
 }

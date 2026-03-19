@@ -33,16 +33,18 @@ final class StatusItemController: NSObject, StatusItemControlling {
     private let nowProvider: () -> TimeInterval
     private let renderEventHandler: ((StatusItemRenderEvent) -> Void)?
     private var cancellables: Set<AnyCancellable> = []
-    private var iconAnimationTimer: Timer?
-    private weak var animatedButton: NSStatusBarButton?
-    private var activeAnimationMode: StatusItemAnimationMode = .none
-    private var remainingFiniteAnimationTicks = 0
-    private var nextAnimationPulseOpacity: CGFloat = 0.62
     private let recordingPillLayer = CAShapeLayer()
+    private var lastRenderedState: RecorderState?
+    private var finalizingRenderedAt: TimeInterval?
+    private var deferredIdleWorkItem: DispatchWorkItem?
 
     private let symbolPointSize: CGFloat = 14
     private let recordingPillFadeDuration: CFTimeInterval = 0.12
-    private let iconPulseInterval: TimeInterval = 0.18
+    private let recordingAnimationDuration: CFTimeInterval = 1.0
+    private let transitionAnimationDuration: CFTimeInterval = 0.28
+    private let transitionAnimationRepeatCount: Float = 2
+    private let minimumFinalizingDisplayDuration: TimeInterval = 0.35
+    private let iconAnimationKey = "status-item-icon-opacity"
 
     init(
         title: String = "Echo",
@@ -76,13 +78,34 @@ final class StatusItemController: NSObject, StatusItemControlling {
                     return
                 }
 
-                render(status: state)
+                renderStateChange(state)
             }
             .store(in: &cancellables)
     }
 
     deinit {
-        iconAnimationTimer?.invalidate()
+        deferredIdleWorkItem?.cancel()
+    }
+
+    private func renderStateChange(_ state: RecorderState) {
+        deferredIdleWorkItem?.cancel()
+        deferredIdleWorkItem = nil
+
+        let now = nowProvider()
+        if state == .idle,
+           lastRenderedState == .finalizing,
+           let finalizingRenderedAt,
+           now - finalizingRenderedAt < minimumFinalizingDisplayDuration {
+            let remainingDelay = minimumFinalizingDisplayDuration - (now - finalizingRenderedAt)
+            let workItem = DispatchWorkItem { [weak self] in
+                self?.render(status: .idle)
+            }
+            deferredIdleWorkItem = workItem
+            DispatchQueue.main.asyncAfter(deadline: .now() + remainingDelay, execute: workItem)
+            return
+        }
+
+        render(status: state)
     }
 
     convenience init(
@@ -147,6 +170,12 @@ final class StatusItemController: NSObject, StatusItemControlling {
             accessibilityLabel: visualState.accessibilityLabel
         )
         latestRenderEvent = renderEvent
+        lastRenderedState = state
+        if state == .finalizing {
+            finalizingRenderedAt = renderEvent.timestamp
+        } else if state == .idle || state == .preparing || state == .recording || state == .pendingFinalize {
+            finalizingRenderedAt = nil
+        }
         renderEventHandler?(renderEvent)
     }
 
@@ -174,6 +203,7 @@ final class StatusItemController: NSObject, StatusItemControlling {
             button.contentTintColor = nil
         } else {
             image?.isTemplate = true
+            button.contentTintColor = nil
         }
 
         button.title = ""
@@ -185,93 +215,33 @@ final class StatusItemController: NSObject, StatusItemControlling {
         visualState: StatusItemVisualState,
         button: NSStatusBarButton
     ) {
-        if visualState.isAnimated {
-            if state == .recording {
-                startContinuousAnimation(on: button)
-            } else {
-                startFiniteAnimation(on: button)
-            }
+        guard let layer = button.layer else {
             return
         }
 
-        stopAnimation(on: button)
-    }
+        layer.removeAnimation(forKey: iconAnimationKey)
 
-    private func startContinuousAnimation(on button: NSStatusBarButton) {
-        if latestRenderEvent?.animationMode != .continuous {
-            stopAnimation(on: button)
+        guard visualState.isAnimated else {
+            button.alphaValue = 1
+            return
         }
 
-        configureAnimationTimer(on: button, mode: .continuous, finiteTickCount: nil)
-    }
+        let animation = CABasicAnimation(keyPath: "opacity")
+        animation.fromValue = 1
+        animation.toValue = 0.72
+        animation.autoreverses = true
+        animation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+        animation.isRemovedOnCompletion = true
 
-    private func startFiniteAnimation(on button: NSStatusBarButton) {
-        configureAnimationTimer(on: button, mode: .finite, finiteTickCount: 4)
-    }
-
-    private func stopAnimation(on button: NSStatusBarButton) {
-        iconAnimationTimer?.invalidate()
-        iconAnimationTimer = nil
-        animatedButton = nil
-        activeAnimationMode = .none
-        remainingFiniteAnimationTicks = 0
-        nextAnimationPulseOpacity = 0.62
-        button.alphaValue = 1
-    }
-
-    private func configureAnimationTimer(
-        on button: NSStatusBarButton,
-        mode: StatusItemAnimationMode,
-        finiteTickCount: Int?
-    ) {
-        iconAnimationTimer?.invalidate()
-        iconAnimationTimer = nil
-
-        if mode == .finite {
-            remainingFiniteAnimationTicks = finiteTickCount ?? 0
+        if state == .recording {
+            animation.duration = recordingAnimationDuration
+            animation.repeatCount = .greatestFiniteMagnitude
         } else {
-            remainingFiniteAnimationTicks = 0
+            animation.duration = transitionAnimationDuration
+            animation.repeatCount = transitionAnimationRepeatCount
         }
 
-        animatedButton = button
-        activeAnimationMode = mode
-        nextAnimationPulseOpacity = 0.62
-        button.alphaValue = 1
-
-        let timer = Timer(
-            timeInterval: iconPulseInterval,
-            target: self,
-            selector: #selector(handleIconAnimationTick(_:)),
-            userInfo: nil,
-            repeats: true
-        )
-        iconAnimationTimer = timer
-        RunLoop.main.add(timer, forMode: .common)
-    }
-
-    @objc
-    private func handleIconAnimationTick(_ timer: Timer) {
-        guard let button = animatedButton else {
-            timer.invalidate()
-            iconAnimationTimer = nil
-            return
-        }
-
-        button.alphaValue = nextAnimationPulseOpacity
-        nextAnimationPulseOpacity = nextAnimationPulseOpacity < 0.8 ? 1 : 0.62
-
-        guard activeAnimationMode == .finite else {
-            return
-        }
-
-        remainingFiniteAnimationTicks -= 1
-        if remainingFiniteAnimationTicks > 0 {
-            return
-        }
-
-        timer.invalidate()
-        iconAnimationTimer = nil
-        activeAnimationMode = .none
+        layer.add(animation, forKey: iconAnimationKey)
         button.alphaValue = 1
     }
 
@@ -298,13 +268,14 @@ final class StatusItemController: NSObject, StatusItemControlling {
 
         recordingPillLayer.opacity = 0
         recordingPillLayer.strokeColor = nil
-        recordingPillLayer.backgroundColor = Self.recordingIndicatorColor(for: button.effectiveAppearance).cgColor
+        recordingPillLayer.backgroundColor = nil
+        recordingPillLayer.fillColor = Self.recordingIndicatorColor(for: button.effectiveAppearance).cgColor
         hostLayer.insertSublayer(recordingPillLayer, at: 0)
         updateRecordingPillPath(for: button)
     }
 
     private func updateRecordingPillPath(for button: NSStatusBarButton) {
-        let insetBounds = button.bounds.insetBy(dx: 2, dy: 2)
+        let insetBounds = CGRect(origin: .zero, size: button.bounds.size).insetBy(dx: 2, dy: 2)
         let radius = insetBounds.height * 0.5
 
         CATransaction.begin()
@@ -322,7 +293,7 @@ final class StatusItemController: NSObject, StatusItemControlling {
     private func setRecordingPillVisible(_ isVisible: Bool, on button: NSStatusBarButton) {
         configureRecordingPillLayerIfNeeded(for: button)
         updateRecordingPillPath(for: button)
-        recordingPillLayer.backgroundColor = Self.recordingIndicatorColor(for: button.effectiveAppearance).cgColor
+        recordingPillLayer.fillColor = Self.recordingIndicatorColor(for: button.effectiveAppearance).cgColor
 
         let targetOpacity: Float = isVisible ? 1 : 0
         let opacityAnimation = CABasicAnimation(keyPath: "opacity")
