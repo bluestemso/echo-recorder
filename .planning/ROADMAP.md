@@ -34,6 +34,12 @@ Plans:
 
 **Requirements:** ICON-01, ICON-02, ICON-03, ICON-04, IND-01, IND-02, IND-03
 
+**Plans:** 2 plans
+
+Plans:
+- [ ] 05-01-PLAN.md — Define and test `RecorderState -> StatusItemVisualState` mapping contract for iconography and recording-only red-pill semantics
+- [ ] 05-02-PLAN.md — Wire state-driven icon/pill rendering in `StatusItemController`, add latency + appearance tests, and run manual visibility checkpoint
+
 **Success criteria:**
 1. Menu bar icon shows `waveform` or `mic.fill` when idle
 2. Menu bar icon shows `record.circle.fill` (red) when recording
