@@ -100,4 +100,22 @@ final class StatusItemVisualStateTests: XCTestCase {
             )
         }
     }
+
+    private func assertVisualState(
+        _ visualState: StatusItemVisualState,
+        symbolName: String,
+        showRecordingPill: Bool,
+        usesPaletteColor: Bool,
+        accessibilityLabel: String,
+        isAnimated: Bool,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        XCTAssertEqual(visualState.symbolName, symbolName, file: file, line: line)
+        XCTAssertEqual(visualState.symbolWeight, .medium, file: file, line: line)
+        XCTAssertEqual(visualState.showRecordingPill, showRecordingPill, file: file, line: line)
+        XCTAssertEqual(visualState.usesPaletteColor, usesPaletteColor, file: file, line: line)
+        XCTAssertEqual(visualState.accessibilityLabel, accessibilityLabel, file: file, line: line)
+        XCTAssertEqual(visualState.isAnimated, isAnimated, file: file, line: line)
+    }
 }
