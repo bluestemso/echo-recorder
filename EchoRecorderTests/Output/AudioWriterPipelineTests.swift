@@ -56,6 +56,33 @@ final class AudioWriterPipelineTests: XCTestCase {
         let mixedFile = try AVAudioFile(forReading: output.mixed)
         XCTAssertGreaterThan(mixedFile.length, 1000)
     }
+
+    func testAudioWriterPipelineHandlesLowSampleRateMonoInput() throws {
+        let fileManager = FileManager.default
+        let tempDirectory = fileManager.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? fileManager.removeItem(at: tempDirectory) }
+
+        let pipeline = AudioWriterPipeline(fileManager: fileManager)
+        let frameCount = 16_000
+        let micSamples = (0..<frameCount).map { index -> Float in
+            let t = Float(index) / 16_000
+            return sin(2 * .pi * 180 * t)
+        }
+        let recordingData = RecordingAudioData(
+            system: SystemAudioSampleBuffer(samples: [], sampleRate: 48_000, channelCount: 1),
+            mic: MicSampleBuffer(samples: micSamples, sampleRate: 16_000, channelCount: 1)
+        )
+
+        let output = try pipeline.writeAudioOutputs(
+            recordingName: "low-rate-mic",
+            in: tempDirectory,
+            recordingData: recordingData
+        )
+
+        XCTAssertTrue(fileManager.fileExists(atPath: output.mic.path))
+        let micFile = try AVAudioFile(forReading: output.mic)
+        XCTAssertGreaterThan(micFile.length, 1000)
+    }
 }
 
 private struct FakeAudioWriterPipeline: AudioWriterPipelining {

@@ -115,16 +115,52 @@ struct AudioWriterPipeline: AudioWriterPipelining {
             AVFormatIDKey: kAudioFormatMPEG4AAC,
             AVSampleRateKey: resolvedSampleRate,
             AVNumberOfChannelsKey: resolvedChannelCount,
-            AVEncoderBitRateKey: 192_000
+            AVEncoderBitRateKey: recommendedBitRate(
+                sampleRate: resolvedSampleRate,
+                channelCount: resolvedChannelCount
+            )
         ]
 
-        let file = try AVAudioFile(
-            forWriting: url,
-            settings: settings,
-            commonFormat: .pcmFormatFloat32,
-            interleaved: false
-        )
-        try file.write(from: buffer)
+        do {
+            let file = try AVAudioFile(
+                forWriting: url,
+                settings: settings,
+                commonFormat: .pcmFormatFloat32,
+                interleaved: false
+            )
+            try file.write(from: buffer)
+        } catch {
+            try? fileManager.removeItem(at: url)
+            let fallbackSettings: [String: Any] = [
+                AVFormatIDKey: kAudioFormatMPEG4AAC,
+                AVSampleRateKey: resolvedSampleRate,
+                AVNumberOfChannelsKey: resolvedChannelCount,
+                AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
+            ]
+            let fallbackFile = try AVAudioFile(
+                forWriting: url,
+                settings: fallbackSettings,
+                commonFormat: .pcmFormatFloat32,
+                interleaved: false
+            )
+            try fallbackFile.write(from: buffer)
+        }
+    }
+
+    private func recommendedBitRate(sampleRate: Double, channelCount: Int) -> Int {
+        let perChannelBitRate: Int
+        switch sampleRate {
+        case ..<22_050:
+            perChannelBitRate = 32_000
+        case ..<44_100:
+            perChannelBitRate = 48_000
+        case ..<88_200:
+            perChannelBitRate = 64_000
+        default:
+            perChannelBitRate = 96_000
+        }
+
+        return perChannelBitRate * max(channelCount, 1)
     }
 }
 
