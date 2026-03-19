@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: completed
-last_updated: "2026-03-18T21:50:55.174Z"
+last_updated: "2026-03-19T03:05:10.057Z"
 progress:
   total_phases: 3
   completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
+  total_plans: 4
+  completed_plans: 3
 ---
 
 # STATE.md
@@ -24,9 +24,9 @@ See: `.planning/PROJECT.md` (updated 2026-03-18)
 
 ## Current Position
 
-Phase: 04 (Input Source Selection) — COMPLETE
-Plan: 2 of 2
-Status: Phase complete
+Phase: 05 (Menu Bar Iconography & Recording Indicator) — IN PROGRESS
+Plan: 1 of 2
+Status: 05-01 complete; ready for 05-02
 
 ---
 
@@ -48,7 +48,7 @@ Status: Phase complete
 | Phase | Name | Status |
 |-------|------|--------|
 | 4 | Input Source Selection | ✅ Complete |
-| 5 | TBD (Menu Bar Iconography) | ⏳ Not started |
+| 5 | Menu Bar Iconography & Recording Indicator | 🔄 In progress (1/2 plans) |
 | 6 | TBD (UX Polish) | ⏳ Not started |
 
 ---
@@ -61,6 +61,8 @@ Status: Phase complete
 - Used Core Audio HAL APIs for macOS device enumeration instead of iOS-only AVAudioSession
 - Device selection via kAudioHardwarePropertyDefaultInputDevice (system-wide, restored after stop) rather than unavailable AVAudioEngine-specific API
 - UID resolution via kAudioHardwarePropertyDeviceForUID before setting default device
+- [Phase 05]: Kept recorder state visual mapping as a pure function to lock iconography semantics before AppKit wiring
+- [Phase 05]: Added exhaustive mapper tests asserting symbol name, medium weight, pill visibility, accessibility labels, and animation flags for all states
 
 ---
 
@@ -69,6 +71,7 @@ Status: Phase complete
 - 04-01: Created InputDeviceService with Core Audio enumeration, built-in mic detection, JSONStore persistence; wired RecorderCoordinator and RecordingViewModel
 - 04-02: Added InputDevicePicker UI component with device type badges
 - Added inline settings section to RecordingPopoverView
+- 05-01: Added StatusItemVisualState mapper contract and exhaustive state-to-icon/pill/accessibility tests
 
 ---
 

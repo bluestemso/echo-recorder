@@ -34,7 +34,7 @@ Plans:
 
 **Requirements:** ICON-01, ICON-02, ICON-03, ICON-04, IND-01, IND-02, IND-03
 
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 
 Plans:
 - [ ] 05-01-PLAN.md — Define and test `RecorderState -> StatusItemVisualState` mapping contract for iconography and recording-only red-pill semantics
