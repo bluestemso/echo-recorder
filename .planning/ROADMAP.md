@@ -56,11 +56,11 @@ Plans:
 
 **Requirements:** POPOV-01, POPOV-02, POPOV-03, POPOV-04, POPOV-05, ANIM-01, ANIM-02, ANIM-03
 
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 
 Plans:
-- [ ] 06-01-PLAN.md — Finalize-first UX state contract (editable name, action hierarchy, saving/success feedback)
-- [ ] 06-02-PLAN.md — Transition timing + popover animation policy (150ms content, near-instant show/close, reduce-motion fallback)
+- [x] 06-01-PLAN.md — Finalize-first UX state contract (editable name, action hierarchy, saving/success feedback)
+- [x] 06-02-PLAN.md — Transition timing + popover animation policy (150ms content, near-instant show/close, reduce-motion fallback)
 
 **Success criteria:**
 1. FinalizeView has larger, clearer action buttons

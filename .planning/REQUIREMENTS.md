@@ -20,17 +20,17 @@
 
 ### Popover Design (POPOV)
 
-- [ ] **POPOV-01**: FinalizeView shows larger, clearer action buttons
-- [ ] **POPOV-02**: FinalizeView shows progress indicator during save operation
-- [ ] **POPOV-03**: FinalizeView shows success feedback after recording is saved
-- [ ] **POPOV-04**: Smooth transition from recording view to finalize view
-- [ ] **POPOV-05**: Popover content transitions complete within 200ms
+- [x] **POPOV-01**: FinalizeView shows larger, clearer action buttons
+- [x] **POPOV-02**: FinalizeView shows progress indicator during save operation
+- [x] **POPOV-03**: FinalizeView shows success feedback after recording is saved
+- [x] **POPOV-04**: Smooth transition from recording view to finalize view
+- [x] **POPOV-05**: Popover content transitions complete within 200ms
 
 ### Animation Speed (ANIM)
 
-- [ ] **ANIM-01**: Popover appears instantly (no fade-in animation)
-- [ ] **ANIM-02**: Popover disappears instantly (no fade-out animation)
-- [ ] **ANIM-03**: Content transitions animate at 150ms duration
+- [x] **ANIM-01**: Popover appears instantly (no fade-in animation)
+- [x] **ANIM-02**: Popover disappears instantly (no fade-out animation)
+- [x] **ANIM-03**: Content transitions animate at 150ms duration
 
 ### Input Source (INPUT)
 
@@ -67,14 +67,14 @@
 | IND-01 | Phase 5 | Complete |
 | IND-02 | Phase 5 | Complete |
 | IND-03 | Phase 5 | Complete |
-| POPOV-01 | Phase 6 | Pending |
-| POPOV-02 | Phase 6 | Pending |
-| POPOV-03 | Phase 6 | Pending |
-| POPOV-04 | Phase 6 | Pending |
-| POPOV-05 | Phase 6 | Pending |
-| ANIM-01 | Phase 6 | Pending |
-| ANIM-02 | Phase 6 | Pending |
-| ANIM-03 | Phase 6 | Pending |
+| POPOV-01 | Phase 6 | Complete |
+| POPOV-02 | Phase 6 | Complete |
+| POPOV-03 | Phase 6 | Complete |
+| POPOV-04 | Phase 6 | Complete |
+| POPOV-05 | Phase 6 | Complete |
+| ANIM-01 | Phase 6 | Complete |
+| ANIM-02 | Phase 6 | Complete |
+| ANIM-03 | Phase 6 | Complete |
 | INPUT-01 | Phase 4 | Complete |
 | INPUT-02 | Phase 4 | Complete |
 | INPUT-03 | Phase 4 | Complete |
