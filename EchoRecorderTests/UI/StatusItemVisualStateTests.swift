@@ -2,32 +2,102 @@ import XCTest
 @testable import EchoRecorder
 
 final class StatusItemVisualStateTests: XCTestCase {
-    func testIdleAndPreparingMapToRecordingTapeWithoutPill() {
-        let idle = statusItemVisualState(for: .idle, appName: "Echo")
-        let preparing = statusItemVisualState(for: .preparing, appName: "Echo")
+    func testIdleAndPreparingUseRecordingTapeSymbol() {
+        let appName = "Echo"
 
-        XCTAssertEqual(idle.symbolName, "recordingtape")
-        XCTAssertEqual(preparing.symbolName, "recordingtape")
-        XCTAssertEqual(idle.symbolWeight, .medium)
-        XCTAssertEqual(preparing.symbolWeight, .medium)
-        XCTAssertFalse(idle.showRecordingPill)
-        XCTAssertFalse(preparing.showRecordingPill)
+        assertVisualState(
+            statusItemVisualState(for: .idle, appName: appName),
+            symbolName: "recordingtape",
+            showRecordingPill: false,
+            usesPaletteColor: false,
+            accessibilityLabel: "Echo idle",
+            isAnimated: false
+        )
+
+        assertVisualState(
+            statusItemVisualState(for: .preparing, appName: appName),
+            symbolName: "recordingtape",
+            showRecordingPill: false,
+            usesPaletteColor: false,
+            accessibilityLabel: "Echo preparing",
+            isAnimated: true
+        )
     }
 
-    func testRecordingMapsToRedRecordCircleWithPill() {
+    func testRecordingUsesRedRecordCircleFill() {
         let recording = statusItemVisualState(for: .recording, appName: "Echo")
 
-        XCTAssertEqual(recording.symbolName, "record.circle.fill")
-        XCTAssertTrue(recording.usesPaletteColor)
-        XCTAssertTrue(recording.showRecordingPill)
+        assertVisualState(
+            recording,
+            symbolName: "record.circle.fill",
+            showRecordingPill: true,
+            usesPaletteColor: true,
+            accessibilityLabel: "Echo recording",
+            isAnimated: true
+        )
     }
 
-    func testFinalizingAndPendingFinalizeHidePill() {
-        let finalizing = statusItemVisualState(for: .finalizing, appName: "Echo")
-        let pending = statusItemVisualState(for: .pendingFinalize, appName: "Echo")
+    func testAllRecorderStatesMapToExpectedVisualState() {
+        let appName = "EchoRecorder"
 
-        XCTAssertEqual(finalizing.symbolName, "externaldrive.badge.checkmark")
-        XCTAssertFalse(finalizing.showRecordingPill)
-        XCTAssertFalse(pending.showRecordingPill)
+        assertVisualState(
+            statusItemVisualState(for: .idle, appName: appName),
+            symbolName: "recordingtape",
+            showRecordingPill: false,
+            usesPaletteColor: false,
+            accessibilityLabel: "EchoRecorder idle",
+            isAnimated: false
+        )
+        assertVisualState(
+            statusItemVisualState(for: .preparing, appName: appName),
+            symbolName: "recordingtape",
+            showRecordingPill: false,
+            usesPaletteColor: false,
+            accessibilityLabel: "EchoRecorder preparing",
+            isAnimated: true
+        )
+        assertVisualState(
+            statusItemVisualState(for: .recording, appName: appName),
+            symbolName: "record.circle.fill",
+            showRecordingPill: true,
+            usesPaletteColor: true,
+            accessibilityLabel: "EchoRecorder recording",
+            isAnimated: true
+        )
+        assertVisualState(
+            statusItemVisualState(for: .pendingFinalize, appName: appName),
+            symbolName: "recordingtape",
+            showRecordingPill: false,
+            usesPaletteColor: false,
+            accessibilityLabel: "EchoRecorder pending finalize",
+            isAnimated: false
+        )
+        assertVisualState(
+            statusItemVisualState(for: .finalizing, appName: appName),
+            symbolName: "externaldrive.badge.checkmark",
+            showRecordingPill: false,
+            usesPaletteColor: false,
+            accessibilityLabel: "EchoRecorder finalizing",
+            isAnimated: true
+        )
+    }
+
+    func testRecordingShowsRedPillOnly() {
+        XCTAssertTrue(statusItemVisualState(for: .recording, appName: "Echo").showRecordingPill)
+        XCTAssertFalse(statusItemVisualState(for: .idle, appName: "Echo").showRecordingPill)
+        XCTAssertFalse(statusItemVisualState(for: .preparing, appName: "Echo").showRecordingPill)
+        XCTAssertFalse(statusItemVisualState(for: .pendingFinalize, appName: "Echo").showRecordingPill)
+        XCTAssertFalse(statusItemVisualState(for: .finalizing, appName: "Echo").showRecordingPill)
+    }
+
+    func testLeavingRecordingRemovesRedPill() {
+        let exitStates: [RecorderState] = [.pendingFinalize, .finalizing, .idle]
+
+        for state in exitStates {
+            XCTAssertFalse(
+                statusItemVisualState(for: state, appName: "Echo").showRecordingPill,
+                "Expected no recording pill in state \(state)"
+            )
+        }
     }
 }
