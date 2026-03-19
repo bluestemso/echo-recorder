@@ -132,4 +132,10 @@ final class RecordingViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.gainValues[.system], 0.75)
         XCTAssertEqual(viewModel.gainValues[.microphone], 1.5)
     }
+
+    func testConfirmFinalizeUsesEditedPendingFinalizeNameForFinalizeCall() {
+        let editedName = "Weekly Standup - Edited"
+        XCTAssertEqual(editedName, "Weekly Standup - Edited")
+        XCTFail("TODO: verify edited pending finalize name is passed to finalizeRecording(recordingName:)")
+    }
 }

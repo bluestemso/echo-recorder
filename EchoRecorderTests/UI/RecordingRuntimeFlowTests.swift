@@ -57,6 +57,12 @@ final class RecordingRuntimeFlowTests: XCTestCase {
         XCTAssertEqual(coordinator.state, .idle)
         XCTAssertEqual(viewModel.lastFinalizedOutput?.mixed.lastPathComponent, "mixed.m4a")
     }
+
+    func testFinalizeSuccessResetDelayTargetsRoughlyOnePointFiveSeconds() {
+        let expectedDelay: TimeInterval = 1.5
+        XCTAssertEqual(expectedDelay, 1.5, accuracy: 0.2)
+        XCTFail("TODO: observe success state before reset and assert reset delay is ~1.5 seconds")
+    }
 }
 
 @MainActor
