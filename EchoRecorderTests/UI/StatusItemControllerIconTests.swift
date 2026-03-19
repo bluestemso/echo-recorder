@@ -126,7 +126,13 @@ final class StatusItemControllerIconTests: XCTestCase {
         RunLoop.main.run(until: Date().addingTimeInterval(0.05))
         XCTAssertEqual(controller.latestRenderEvent?.state, .finalizing)
 
-        RunLoop.main.run(until: Date().addingTimeInterval(0.45))
+        RunLoop.main.run(until: Date().addingTimeInterval(0.75))
         XCTAssertEqual(controller.latestRenderEvent?.state, .idle)
+    }
+
+    func testPopoverPolicyUsesExplicitFadeTiming() {
+        XCTAssertEqual(PopoverAnimationPolicy.fadeDuration(for: .show), 0.075, accuracy: 0.001)
+        XCTAssertEqual(PopoverAnimationPolicy.fadeDuration(for: .close), 0.075, accuracy: 0.001)
+        XCTAssertFalse(PopoverAnimationPolicy.usesSystemPopoverAnimation)
     }
 }

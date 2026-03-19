@@ -38,13 +38,13 @@ final class StatusItemController: NSObject, StatusItemControlling {
     private var finalizingRenderedAt: TimeInterval?
     private var deferredIdleWorkItem: DispatchWorkItem?
 
-    private let symbolPointSize: CGFloat = 14
+    private let symbolPointSize: CGFloat = 15
     private let recordingPillFadeDuration: CFTimeInterval = 0.12
-    private let recordingAnimationDuration: CFTimeInterval = 1.0
-    private let transitionAnimationDuration: CFTimeInterval = 0.28
+    private let recordingAnimationDuration: CFTimeInterval = 1.4
+    private let transitionAnimationDuration: CFTimeInterval = 0.45
     private let transitionAnimationRepeatCount: Float = 2
-    private let minimumFinalizingDisplayDuration: TimeInterval = 0.35
-    private let iconAnimationKey = "status-item-icon-opacity"
+    private let minimumFinalizingDisplayDuration: TimeInterval = 0.6
+    private let iconAnimationKey = "status-item-icon-animation"
 
     init(
         title: String = "Echo",
@@ -69,6 +69,7 @@ final class StatusItemController: NSObject, StatusItemControlling {
         configureStatusButton()
 
         popover.behavior = .transient
+        popover.animates = PopoverAnimationPolicy.usesSystemPopoverAnimation
         popover.contentViewController = NSHostingController(rootView: RecordingPopoverView(viewModel: self.viewModel))
 
         recorderCoordinator.$state
@@ -130,9 +131,30 @@ final class StatusItemController: NSObject, StatusItemControlling {
         }
 
         if popover.isShown {
-            popover.performClose(sender)
+            guard let contentView = popover.contentViewController?.view else {
+                popover.performClose(sender)
+                return
+            }
+
+            NSAnimationContext.runAnimationGroup { context in
+                context.duration = PopoverAnimationPolicy.fadeDuration(for: .close)
+                context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+                contentView.animator().alphaValue = 0
+            } completionHandler: {
+                self.popover.performClose(sender)
+                contentView.alphaValue = 1
+            }
         } else {
+            popover.contentViewController?.view.alphaValue = 0
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+            if let contentView = popover.contentViewController?.view {
+                NSAnimationContext.runAnimationGroup { context in
+                    context.duration = PopoverAnimationPolicy.fadeDuration(for: .show)
+                    context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+                    contentView.animator().alphaValue = 1
+                }
+            }
+            button.highlight(false)
         }
     }
 
@@ -194,7 +216,14 @@ final class StatusItemController: NSObject, StatusItemControlling {
 
         var image = symbol.withSymbolConfiguration(baseConfiguration)
 
-        if visualState.usesPaletteColor {
+        if visualState.showRecordingPill {
+            let monochromeConfiguration = NSImage.SymbolConfiguration(
+                hierarchicalColor: Self.recordingForegroundColor(for: button.effectiveAppearance)
+            )
+            image = image?.withSymbolConfiguration(monochromeConfiguration)
+            image?.isTemplate = false
+            button.contentTintColor = nil
+        } else if visualState.usesPaletteColor {
             let paletteConfiguration = NSImage.SymbolConfiguration(
                 paletteColors: [Self.recordingSymbolColor(for: button.effectiveAppearance)]
             )
@@ -208,6 +237,7 @@ final class StatusItemController: NSObject, StatusItemControlling {
 
         button.title = ""
         button.image = image
+        button.highlight(false)
     }
 
     private func applyAnimation(
@@ -226,17 +256,20 @@ final class StatusItemController: NSObject, StatusItemControlling {
             return
         }
 
-        let animation = CABasicAnimation(keyPath: "opacity")
-        animation.fromValue = 1
-        animation.toValue = 0.72
+        let animationKeyPath = state == .recording ? "transform.scale" : "opacity"
+        let animation = CABasicAnimation(keyPath: animationKeyPath)
         animation.autoreverses = true
         animation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
         animation.isRemovedOnCompletion = true
 
         if state == .recording {
+            animation.fromValue = 1
+            animation.toValue = 0.92
             animation.duration = recordingAnimationDuration
             animation.repeatCount = .greatestFiniteMagnitude
         } else {
+            animation.fromValue = 1
+            animation.toValue = 0.82
             animation.duration = transitionAnimationDuration
             animation.repeatCount = transitionAnimationRepeatCount
         }
@@ -310,9 +343,19 @@ final class StatusItemController: NSObject, StatusItemControlling {
         let match = appearance?.bestMatch(from: [.darkAqua, .vibrantDark, .aqua, .vibrantLight])
         switch match {
         case .darkAqua, .vibrantDark:
-            return NSColor(srgbRed: 1.0, green: 0.34, blue: 0.33, alpha: 0.86)
+            return NSColor(srgbRed: 1.0, green: 0.30, blue: 0.28, alpha: 0.9)
         default:
-            return NSColor(srgbRed: 0.82, green: 0.14, blue: 0.16, alpha: 0.74)
+            return NSColor(srgbRed: 0.9, green: 0.1, blue: 0.14, alpha: 0.86)
+        }
+    }
+
+    private static func recordingForegroundColor(for appearance: NSAppearance?) -> NSColor {
+        let match = appearance?.bestMatch(from: [.darkAqua, .vibrantDark, .aqua, .vibrantLight])
+        switch match {
+        case .darkAqua, .vibrantDark:
+            return NSColor(srgbRed: 1, green: 1, blue: 1, alpha: 1)
+        default:
+            return NSColor(srgbRed: 1, green: 1, blue: 1, alpha: 1)
         }
     }
 
