@@ -2,11 +2,65 @@
 
 ## Overview
 
-**3 phases** | **19 requirements mapped** | All v2.0 requirements covered ✓
+**6 phases** | **21 active requirements mapped** | All v2.0 requirements covered ✓
 
 ---
 
-## Phase 4: Input Source Selection
+## Phase 01: Live Level Monitoring
+
+**Goal:** Add live, per-source audio level feedback during recording.
+
+**Requirements:** METER-01, METER-02, METER-03, METER-04 (legacy baseline)
+
+**Plans:** 1/1 plans complete
+
+Plans:
+- [x] 01-PLAN.md — Wire recorder sample callbacks to metering UI with animated level bars
+
+**Success criteria:**
+1. System and mic levels are visible in the recording popover
+2. Level bars update in near real time from incoming audio buffers
+3. Visual metering uses clear low/medium/high color states
+
+---
+
+## Phase 02: Per-Source Gain Control
+
+**Goal:** Let users adjust mic and system gain independently from the popover.
+
+**Requirements:** GAIN-01, GAIN-02, GAIN-03 (legacy baseline)
+
+**Plans:** 1/1 plans complete
+
+Plans:
+- [x] 02-PLAN.md — Add per-source slider controls and bind them to recording gain state
+
+**Success criteria:**
+1. Each source row exposes a gain slider
+2. Slider updates are reflected immediately in displayed levels
+3. Gain values remain in sync with recorder/view-model state
+
+---
+
+## Phase 03: Save Location Picker
+
+**Goal:** Add finalize-time save location selection with persisted default directory.
+
+**Requirements:** SAVE-01, SAVE-02, SAVE-03 (legacy baseline)
+
+**Plans:** 1/1 plans complete
+
+Plans:
+- [x] 03-PLAN.md — Add save location persistence + finalize flow directory picker
+
+**Success criteria:**
+1. User can choose save directory before finalizing
+2. If no override is chosen, app uses persisted default directory
+3. Default save directory persists across launches
+
+---
+
+## Phase 04: Input Source Selection
 
 **Goal:** Fix Bluetooth microphone issue by adding input source selection with fallback to built-in microphone.
 
@@ -28,7 +82,7 @@ Plans:
 
 ---
 
-## Phase 5: Menu Bar Iconography & Recording Indicator
+## Phase 05: Menu Bar Iconography & Recording Indicator
 
 **Goal:** Use SF Symbols for menu bar icons and add red background indicator during recording.
 
@@ -50,7 +104,7 @@ Plans:
 
 ---
 
-## Phase 6: Popover UX Improvements
+## Phase 06: Popover UX Improvements
 
 **Goal:** Improve popover design (especially post-recording view) and speed up animations.
 
@@ -77,24 +131,24 @@ Plans:
 
 | REQ-ID | Phase |
 |--------|-------|
-| INPUT-01 | Phase 4 |
-| INPUT-02 | Phase 4 |
-| INPUT-03 | Phase 4 |
-| INPUT-04 | Phase 4 |
-| INPUT-05 | Phase 4 |
-| INPUT-06 | Phase 4 |
-| ICON-01 | Phase 5 |
-| ICON-02 | Phase 5 |
-| ICON-03 | Phase 5 |
-| ICON-04 | Phase 5 |
-| IND-01 | Phase 5 |
-| IND-02 | Phase 5 |
-| IND-03 | Phase 5 |
-| POPOV-01 | Phase 6 |
-| POPOV-02 | Phase 6 |
-| POPOV-03 | Phase 6 |
-| POPOV-04 | Phase 6 |
-| POPOV-05 | Phase 6 |
-| ANIM-01 | Phase 6 |
-| ANIM-02 | Phase 6 |
-| ANIM-03 | Phase 6 |
+| INPUT-01 | Phase 04 |
+| INPUT-02 | Phase 04 |
+| INPUT-03 | Phase 04 |
+| INPUT-04 | Phase 04 |
+| INPUT-05 | Phase 04 |
+| INPUT-06 | Phase 04 |
+| ICON-01 | Phase 05 |
+| ICON-02 | Phase 05 |
+| ICON-03 | Phase 05 |
+| ICON-04 | Phase 05 |
+| IND-01 | Phase 05 |
+| IND-02 | Phase 05 |
+| IND-03 | Phase 05 |
+| POPOV-01 | Phase 06 |
+| POPOV-02 | Phase 06 |
+| POPOV-03 | Phase 06 |
+| POPOV-04 | Phase 06 |
+| POPOV-05 | Phase 06 |
+| ANIM-01 | Phase 06 |
+| ANIM-02 | Phase 06 |
+| ANIM-03 | Phase 06 |
